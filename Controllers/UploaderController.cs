@@ -27,13 +27,15 @@ public class UploaderController : ControllerBase
         }
         if(ext == ".xlsx")
         {
-          var composicoes = FileManager.Composicao(file.OpenReadStream());
+          var filemanager = new FileManager(file.OpenReadStream());
+          var composicoes = filemanager.Composicao();
           this.database.composicao.AddRange(composicoes);
           this.database.SaveChanges();
         }
         if(ext == ".csv")
         {
-          var servicos = FileManager.Relatorio(new StreamReader(file.OpenReadStream()));
+          var filemanager = new FileManager(file.OpenReadStream());
+          var servicos = filemanager.Relatorio();
           this.database.relatorio.AddRange(servicos);
           this.database.SaveChanges();
         }

@@ -1,9 +1,18 @@
 using backend.Models;
 using OfficeOpenXml;
 namespace backend.Services;
-public static class FileManager
+public class FileManager
 {
-  public static StreamReader Sanitizacao(StreamReader stream)
+  private readonly List<String> erros;
+  private readonly List<Object> list;
+  private readonly Stream stream;
+  public FileManager(Stream stream)
+  {
+    this.erros = new();
+    this.list = new();
+    this.stream = stream;
+  }
+  public StreamReader Sanitizacao(StreamReader stream)
   {
     var memory = new MemoryStream();
     var writer = new StreamWriter(memory);
@@ -29,7 +38,7 @@ public static class FileManager
     memory.Position = 0;
     return new StreamReader(memory);
   }
-  public static List<Servico> Relatorio(StreamReader stream)
+  public List<Servico> Relatorio(StreamReader stream)
   {
     using var streamsanitizado = Sanitizacao(stream);
     var servicos = new List<Servico>();
@@ -64,7 +73,7 @@ public static class FileManager
     }
     return servicos;
   }
-  public static List<Composicao> Composicao(Stream stream)
+  public List<Composicao> Composicao(Stream stream)
   {
     var composicoes = new List<Composicao>();
     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -84,31 +93,36 @@ public static class FileManager
       var rowCount = worksheet.Dimension.Rows;
       for(int row = 2; row < rowCount; row++)
       {
-        var composicao = new Composicao
+        var composicao = new Composicao();
+        composicao.dia = DateOnly.FromDateTime(worksheet.GetValue<DateTime>(row, 1));
+        composicao.adesivo = Int32.TryParse(worksheet.GetValue<string>(row, 2), out int ordem) ? ordem : 0;
+        composicao.placa = worksheet.GetValue<string>(row, 3)
+          .Replace("-", "")
+          .Replace(" ", "");
+        composicao.recurso = worksheet.GetValue<string>(row, 4).Trim();
+        composicao.atividade = Enum.Parse<Atividade>(worksheet.GetValue<string>(row, 5)
+          .Replace("RELIGA POSTO", "AVANCADO")
+          .Replace("RELIGA CAMINHÃO", "CAMINHAO")
+          .Replace("EMERGÊNCIA", "EMERGENCIA"));
+        composicao.motorista = worksheet.GetValue<string>(row, 6);
+        composicao.id_motorista = worksheet.GetValue<Int32>(row, 7);
+        composicao.ajudante = worksheet.GetValue<string>(row, 8);
+        composicao.id_ajudante = worksheet.GetValue<Int32>(row, 9);
+        var tel = worksheet.GetValue<string>(row, 10);
+        if(tel != null)
         {
-          dia = DateOnly.FromDateTime(worksheet.GetValue<DateTime>(row, 1)),
-          adesivo = worksheet.GetValue<Int32>(row, 2),
-          placa = worksheet.GetValue<string>(row, 3)
-            .Replace("-", "")
-            .Replace(" ", ""),
-          recurso = worksheet.GetValue<string>(row, 4).Trim(),
-          atividade = Enum.Parse<Atividade>(worksheet.GetValue<string>(row, 5)
-            .Replace("RELIGA POSTO", "AVANCADO")
-            .Replace("RELIGA CAMINHÃO", "CAMINHAO")
-            .Replace("EMERGÊNCIA", "EMERGENCIA")),
-          motorista = worksheet.GetValue<string>(row, 6),
-          id_motorista = worksheet.GetValue<Int32>(row, 7),
-          ajudante = worksheet.GetValue<string>(row, 8),
-          id_ajudante = worksheet.GetValue<Int32>(row, 9),
-          telefone = Int64.Parse(worksheet.GetValue<string>(row, 10)
-            .Replace("-", "")
-            .Replace(" ", "")),
-          id_supervisor = worksheet.GetValue<Int32>(row, 11),
-          supervisor = worksheet.GetValue<string>(row, 12),
-          regional = Enum.Parse<Regional>(worksheet.GetValue<string>(row, 13)
-            .Replace("CAMPO GRANDE", "OESTE")
-            .Replace("JACAREPAGUA", "OESTE")),
-        };
+          tel = tel.Replace("-", "").Replace(" ", "");
+          composicao.telefone = Int64.Parse(tel);
+        }
+        else
+        {
+          composicao.telefone = 0;
+        }
+        composicao.id_supervisor = worksheet.GetValue<Int32>(row, 11);
+        composicao.supervisor = worksheet.GetValue<string>(row, 12);
+        composicao.regional = Enum.Parse<Regional>(worksheet.GetValue<string>(row, 13)
+          .Replace("CAMPO GRANDE", "OESTE")
+          .Replace("JACAREPAGUA", "OESTE"));
         composicoes.Add(composicao);
         // var validation_result = new List<ValidationResult>();
         // var validation_context = new ValidationContext(composicao);
