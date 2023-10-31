@@ -7,7 +7,7 @@ public class Database : DbContext
   {
     if(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
     {
-      optionsBuilder.UseSqlite("Data Source=database.db")
+      optionsBuilder.UseSqlite("Data Source=AppData/database.db")
         .LogTo(Console.WriteLine, LogLevel.Information)
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors();
