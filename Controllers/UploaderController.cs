@@ -13,33 +13,10 @@ public class UploaderController : ControllerBase
     [HttpPost]
     public ActionResult<List<string>> Post(IFormFile file)
     {
-        var erros = new List<string>();
-        string ext = Path.GetExtension(file.FileName);
-        if(ext != ".xlsx" && ext != ".csv")
-        {
-          erros.Add("O tipo de arquivo enviado não é suportado!");
-          return BadRequest(erros);
-        }
-        if(file.Length == 0)
-        {
-          erros.Add("O arquivo enviado está vazio!");
-          return BadRequest(erros);
-        }
-        if(ext == ".xlsx")
-        {
-          var filemanager = new FileManager(file.OpenReadStream());
-          var composicoes = filemanager.Composicao();
-          this.database.composicao.AddRange(composicoes);
-          this.database.SaveChanges();
-        }
-        if(ext == ".csv")
-        {
-          var filemanager = new FileManager(file.OpenReadStream());
-          var servicos = filemanager.Relatorio();
-          this.database.relatorio.AddRange(servicos);
-          this.database.SaveChanges();
-        }
-        // TODO:
-        return (erros.Count != 0) ? BadRequest(erros) : Ok(erros);
+        var filemanager = new FileManager(file);
+        if(filemanager.erros.Count > 0) return BadRequest(filemanager.erros);
+        this.database.AddRange(filemanager.list);
+        this.database.SaveChanges();
+        return Ok(filemanager.erros);
     }
 }

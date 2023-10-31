@@ -3,22 +3,51 @@ using OfficeOpenXml;
 namespace backend.Services;
 public class FileManager
 {
-  private readonly List<String> erros;
-  private readonly List<Object> list;
-  private readonly Stream stream;
-  public FileManager(Stream stream)
+  private readonly IFormFile file;
+  public readonly List<String> erros;
+  public readonly List<IEntity> list;
+  public FileManager(IFormFile file)
   {
     this.erros = new();
     this.list = new();
-    this.stream = stream;
+    this.file = file;
+    if(this.is_valid())
+    {
+      if(true_if_xls_false_if_csv_null_if_neither() == true)
+        this.list = Composicao(this.file.OpenReadStream()).Cast<IEntity>().ToList();
+      if(true_if_xls_false_if_csv_null_if_neither() == false)
+        this.list = Relatorio(this.file.OpenReadStream()).Cast<IEntity>().ToList();
+    }
   }
-  public StreamReader Sanitizacao(StreamReader stream)
+  private bool is_valid()
   {
+    if(file.Length == 0)
+    {
+      erros.Add("O arquivo enviado está vazio!");
+      return false;
+    }
+    if(true_if_xls_false_if_csv_null_if_neither() is null)
+    {
+      erros.Add("O formato de arquivo é inválido!");
+      return false;
+    }
+    return true;
+  }
+  private bool? true_if_xls_false_if_csv_null_if_neither()
+  {
+    string ext = Path.GetExtension(file.FileName);
+    if(ext == ".xlsx") return true;
+    if(ext == ".csv") return false;
+    return null;
+  }
+  public StreamReader Sanitizacao(Stream stream)
+  {
+    var reader = new StreamReader(stream);
     var memory = new MemoryStream();
     var writer = new StreamWriter(memory);
     int character = 0;
     bool insideField = false;
-    while ((character = stream.Read()) != -1)
+    while ((character = reader.Read()) != -1)
     {
       var letra = (char)character;
       if (letra == '"') insideField = !insideField; // inverte a variável
@@ -38,7 +67,7 @@ public class FileManager
     memory.Position = 0;
     return new StreamReader(memory);
   }
-  public List<Servico> Relatorio(StreamReader stream)
+  public List<Servico> Relatorio(Stream stream)
   {
     using var streamsanitizado = Sanitizacao(stream);
     var servicos = new List<Servico>();
