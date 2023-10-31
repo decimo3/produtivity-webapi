@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models;
 [Table("servico")]
-public class Servico : IValidatableObject
+public class Servico : IEntity, IValidatableObject
 {
   public string recurso { get; set; }
   public DateOnly dia { get; set; }

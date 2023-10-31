@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 namespace backend.Models;
-public class Composicao : IValidatableObject
+public class Composicao : IEntity, IValidatableObject
 {
   [Required]
   public DateOnly dia { get; set; }
