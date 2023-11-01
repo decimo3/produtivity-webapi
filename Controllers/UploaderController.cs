@@ -11,12 +11,23 @@ public class UploaderController : ControllerBase
         this.database = _database;
     }
     [HttpPost]
-    public ActionResult<List<string>> Post(IFormFile file)
+    public IActionResult Post(IFormFile file)
     {
         var filemanager = new FileManager(file);
         if(filemanager.erros.Count > 0) return BadRequest(filemanager.erros);
         this.database.AddRange(filemanager.list);
-        this.database.SaveChanges();
-        return Ok(filemanager.erros);
+        try
+        {
+          this.database.SaveChanges();
+          return Created("/relatorio", null);
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
+        {
+          return BadRequest(erro.InnerException.Message);
+        }
+        catch (System.Exception erro)
+        {
+          return Problem(erro.Message);
+        }
     }
 }
