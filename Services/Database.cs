@@ -34,4 +34,5 @@ public class Database : DbContext
   }
   public DbSet<Composicao> composicao { get; set; }
   public DbSet<Servico> relatorio { get; set; }
+  public DbSet<Funcionario> funcionario { get; set; }
 }
