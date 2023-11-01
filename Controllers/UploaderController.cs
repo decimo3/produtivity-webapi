@@ -13,7 +13,7 @@ public class UploaderController : ControllerBase
     [HttpPost]
     public IActionResult Post(IFormFile file)
     {
-        var filemanager = new FileManager(file);
+        var filemanager = new FileManager(this.database, file);
         if(filemanager.erros.Count > 0) return BadRequest(filemanager.erros);
         this.database.AddRange(filemanager.list);
         try
