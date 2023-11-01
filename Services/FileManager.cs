@@ -1,10 +1,13 @@
+using System.Linq.Expressions;
 using backend.Models;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.DependencyModel.Resolution;
 using OfficeOpenXml;
 namespace backend.Services;
 public class FileManager
 {
   private readonly IFormFile file;
-  public readonly List<String> erros;
+  public readonly List<ErroValidacao> erros;
   public readonly List<IEntity> list;
   public FileManager(IFormFile file)
   {
@@ -23,12 +26,12 @@ public class FileManager
   {
     if(file.Length == 0)
     {
-      erros.Add("O arquivo enviado está vazio!");
+      erros.Add(new ErroValidacao(0, null, null, "O arquivo enviado está vazio!"));
       return false;
     }
     if(true_if_xls_false_if_csv_null_if_neither() is null)
     {
-      erros.Add("O formato de arquivo é inválido!");
+      erros.Add(new ErroValidacao(0, null, null, "O formato de arquivo é inválido!"));
       return false;
     }
     return true;
@@ -93,10 +96,10 @@ public class FileManager
           observacao = values[49],
           instalacao = Int32.TryParse(values[55], out int inst) ? inst : 0,
           tipo_servico = values[60],
-          Desloca_estima = TimeOnly.TryParse(values[69], out TimeOnly desloca_est) ? desloca_est : null,
-          duracao_estima = TimeOnly.TryParse(values[70], out TimeOnly duracao_est) ? duracao_est : null,
+          Desloca_estima = TimeOnly.TryParse("00:" + values[69], out TimeOnly desloca_est) ? desloca_est : null,
+          duracao_estima = TimeOnly.TryParse("00:" + values[70], out TimeOnly duracao_est) ? duracao_est : null,
           codigos = (values[44] != String.Empty) ? values[44] : values[59].Split(' ')[0],
-          status = (values[3] == "não concluído" && values[59] == "20.5") ? "concluído" : values[3],
+          status = (values[3] == "não concluído" && values[59].Split(' ')[0] == "20.5") ? "concluído" : values[3],
         });
       }
     }
@@ -110,57 +113,143 @@ public class FileManager
     {
       if(reader.Workbook.Worksheets.Count > 1)
       {
-        throw new InvalidOperationException("O arquivo enviado tem mais de uma planilha!");
+        this.erros.Add(new ErroValidacao(0, null, null, "O arquivo enviado tem mais de uma planilha!"));
+        return composicoes;
       }
       var worksheet = reader.Workbook.Worksheets[0];
       var colCount = worksheet.Dimension.Columns;
       if(colCount != 13)
       {
         var maisoumenos = (colCount > 13) ? "mais" : "menos";
-        throw new InvalidOperationException($"O arquivo enviado tem colunas a {maisoumenos} que o padrão!");
+        this.erros.Add(new ErroValidacao(0, null, null, $"O arquivo enviado tem colunas a {maisoumenos} que o padrão!"));
+        return composicoes;
       }
       var rowCount = worksheet.Dimension.Rows;
+      string temp;
       for(int row = 2; row < rowCount; row++)
       {
         var composicao = new Composicao();
-        composicao.dia = DateOnly.FromDateTime(worksheet.GetValue<DateTime>(row, 1));
-        composicao.adesivo = Int32.TryParse(worksheet.GetValue<string>(row, 2), out int ordem) ? ordem : 0;
-        composicao.placa = worksheet.GetValue<string>(row, 3)
-          .Replace("-", "")
-          .Replace(" ", "");
-        composicao.recurso = worksheet.GetValue<string>(row, 4).Trim();
-        composicao.atividade = Enum.Parse<Atividade>(worksheet.GetValue<string>(row, 5)
-          .Replace("RELIGA POSTO", "AVANCADO")
-          .Replace("RELIGA CAMINHÃO", "CAMINHAO")
-          .Replace("EMERGÊNCIA", "EMERGENCIA"));
-        composicao.motorista = worksheet.GetValue<string>(row, 6);
-        composicao.id_motorista = worksheet.GetValue<Int32>(row, 7);
-        composicao.ajudante = worksheet.GetValue<string>(row, 8);
-        composicao.id_ajudante = worksheet.GetValue<Int32>(row, 9);
-        var tel = worksheet.GetValue<string>(row, 10);
-        if(tel != null)
+        var is_valid = true;
+        temp = worksheet.GetValue<string>(row, 1);
+        if(this.is_valid(temp, row, "Dia", ExpectedType.Date))
+          composicao.dia = DateOnly.Parse(temp);
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 2);
+        if(this.is_valid(temp, row, "Adesivo", ExpectedType.Number))
+          composicao.adesivo = Int32.Parse(temp);
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 3);
+        if(this.is_valid(temp, row, "Placa", ExpectedType.Text))
+          composicao.placa = temp.Replace("-", "").Replace(" ", "");
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 4);
+        if(this.is_valid(temp, row, "Recurso", ExpectedType.Text))
+          composicao.recurso = temp.Trim();
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 5);
+        if(this.is_valid(temp, row, "Atividade", ExpectedType.Enum))
+          composicao.atividade = Enum.Parse<Atividade>(temp
+            .Replace("RELIGA POSTO", "AVANCADO")
+            .Replace("RELIGA CAMINHÃO", "CAMINHAO")
+            .Replace("EMERGÊNCIA", "EMERGENCIA"));
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 6);
+        if(this.is_valid(temp, row, "Motorista", ExpectedType.Text))
+          composicao.motorista = temp.Trim();
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 7);
+        if(this.is_valid(temp, row, "Mat. Mot.", ExpectedType.Number))
+          composicao.id_motorista = Int32.Parse(temp);
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 8);
+        if(this.is_valid(temp, row, "Ajudante", ExpectedType.Text))
+          composicao.ajudante = temp.Trim();
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 9);
+        if(this.is_valid(temp, row, "Mat. Aju.", ExpectedType.Number))
+          composicao.id_ajudante = Int32.Parse(temp);
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 10);
+        if(this.is_valid(temp, row, "Telefone", ExpectedType.Number))
         {
-          tel = tel.Replace("-", "").Replace(" ", "");
-          composicao.telefone = Int64.Parse(tel);
+          temp = temp.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
+          if(temp.Length == 9) temp = "5521" + temp;
+          if(temp.Length == 11) temp = "55" + temp;
+          if(temp.Length != 13)
+          {
+            this.erros.Add(new ErroValidacao(row, "Telefone", temp, "O número de telefone não é válido!"));
+            is_valid = false;
+          }
+          else composicao.telefone = Int64.Parse(temp);
         }
-        else
-        {
-          composicao.telefone = 0;
-        }
-        composicao.id_supervisor = worksheet.GetValue<Int32>(row, 11);
-        composicao.supervisor = worksheet.GetValue<string>(row, 12);
-        composicao.regional = Enum.Parse<Regional>(worksheet.GetValue<string>(row, 13)
-          .Replace("CAMPO GRANDE", "OESTE")
-          .Replace("JACAREPAGUA", "OESTE"));
-        composicoes.Add(composicao);
-        // var validation_result = new List<ValidationResult>();
-        // var validation_context = new ValidationContext(composicao);
-        // if(Validator.TryValidateObject(composicao, validation_context, validation_result, validateAllProperties: true))
-        // {
-        //   composicoes.Add(composicao);
-        // }
+        else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 11);
+        if(this.is_valid(temp, row, "Mat. Sup.", ExpectedType.Number))
+          composicao.id_supervisor = Int32.Parse(temp);
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 12);
+        if(this.is_valid(temp, row, "Supervisor", ExpectedType.Text))
+          composicao.supervisor = temp.Trim();
+          else is_valid = false;
+        temp = worksheet.GetValue<string>(row, 13);
+        if(this.is_valid(temp, row, "Atividade", ExpectedType.Enum))
+          composicao.regional = Enum.Parse<Regional>(temp
+            .Replace("CAMPO GRANDE", "OESTE")
+            .Replace("JACAREPAGUA", "OESTE"));
+        if(is_valid) composicoes.Add(composicao);
       }
     }
     return composicoes;
   }
+  private bool is_valid(string? arg, int linha, string campo, ExpectedType expectedType)
+  {
+    if(arg == null)
+    {
+      this.erros.Add(new ErroValidacao(linha, campo, arg, "O valor não foi preenchido!"));
+      return false;
+    }
+    arg = arg.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
+    switch(expectedType)
+    {
+      case ExpectedType.Date:
+        if(!DateOnly.TryParse(arg, out DateOnly dia))
+        {
+          this.erros.Add(new ErroValidacao(linha, campo, arg, "A data não pode ser reconhecida!"));
+          return false;
+        }
+        return true;
+      case ExpectedType.Time:
+        if(!TimeOnly.TryParse(arg, out TimeOnly hrs))
+        {
+          this.erros.Add(new ErroValidacao(linha, campo, arg, "A hora não pode ser reconhecida!"));
+          return false;
+        }
+        return true;
+      case ExpectedType.Number:
+        if(Int64.TryParse(arg, out Int64 num))
+        {
+          this.erros.Add(new ErroValidacao(linha, campo, arg, "A número contém caracteres inválidos!"));
+          return false;
+        }
+        return true;
+      case ExpectedType.Text:
+        if(arg.Length < 5)
+        {
+          this.erros.Add(new ErroValidacao(linha, campo, arg, "O texto está incompleto ou vazio!"));
+          return false;
+        }
+        return true;
+      case ExpectedType.Enum:
+        String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA"};
+        if(!enums.Contains(arg))
+        {
+          this.erros.Add(new ErroValidacao(linha, campo, arg, "O texto encontrado não corresponde com o padrão!"));
+          return false;
+        }
+        return true;
+      default:
+        return false;
+    }
+  }
+  private enum ExpectedType {Text, Number, Date, Time, Enum}
 }
