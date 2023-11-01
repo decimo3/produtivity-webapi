@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using backend.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -196,6 +197,17 @@ public class FileManager
           composicao.regional = Enum.Parse<Regional>(temp
             .Replace("CAMPO GRANDE", "OESTE")
             .Replace("JACAREPAGUA", "OESTE"));
+          else is_valid = false;
+        var validacaoContexto = new ValidationContext(composicao);
+        var errosValidacao = composicao.Validate(validacaoContexto);
+        if(errosValidacao.Any())
+        {
+          foreach (var erro in errosValidacao)
+          {
+            this.erros.Add(new ErroValidacao(row, null, null, erro.ErrorMessage));
+          }
+          is_valid = false;
+        }
         if(is_valid) composicoes.Add(composicao);
       }
     }
@@ -208,6 +220,7 @@ public class FileManager
       this.erros.Add(new ErroValidacao(linha, campo, arg, "O valor não foi preenchido!"));
       return false;
     }
+    arg = arg.Trim();
     switch(expectedType)
     {
       case ExpectedType.Date:
