@@ -130,9 +130,9 @@ public class FileManager
       {
         var composicao = new Composicao();
         var is_valid = true;
-        temp = worksheet.GetValue<string>(row, 1);
+        temp = worksheet.GetValue<DateTime>(row, 1).ToString();
         if(this.is_valid(temp, row, "Dia", ExpectedType.Date))
-          composicao.dia = DateOnly.Parse(temp);
+          composicao.dia = DateOnly.Parse(temp[0..9]);
           else is_valid = false;
         temp = worksheet.GetValue<string>(row, 2);
         if(this.is_valid(temp, row, "Adesivo", ExpectedType.Number))
@@ -208,11 +208,11 @@ public class FileManager
       this.erros.Add(new ErroValidacao(linha, campo, arg, "O valor não foi preenchido!"));
       return false;
     }
-    arg = arg.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
     switch(expectedType)
     {
       case ExpectedType.Date:
-        if(!DateOnly.TryParse(arg, out DateOnly dia))
+
+        if(!DateOnly.TryParse(arg[0..9], out DateOnly dia))
         {
           this.erros.Add(new ErroValidacao(linha, campo, arg, "A data não pode ser reconhecida!"));
           return false;
@@ -226,7 +226,8 @@ public class FileManager
         }
         return true;
       case ExpectedType.Number:
-        if(Int64.TryParse(arg, out Int64 num))
+        arg = arg.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
+        if(!Int64.TryParse(arg, out Int64 num))
         {
           this.erros.Add(new ErroValidacao(linha, campo, arg, "A número contém caracteres inválidos!"));
           return false;
