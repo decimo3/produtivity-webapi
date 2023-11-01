@@ -10,8 +10,10 @@ public class FileManager
   private readonly IFormFile file;
   public readonly List<ErroValidacao> erros;
   public readonly List<IEntity> list;
-  public FileManager(IFormFile file)
+  private readonly Database database;
+  public FileManager(Database database, IFormFile file)
   {
+    this.database = database;
     this.erros = new();
     this.list = new();
     this.file = file;
@@ -155,21 +157,47 @@ public class FileManager
             .Replace("EMERGÊNCIA", "EMERGENCIA"));
           else is_valid = false;
         temp = worksheet.GetValue<string>(row, 6);
+        var func = new Funcionario();
         if(this.is_valid(temp, row, "Motorista", ExpectedType.Text))
+        {
           composicao.motorista = temp.Trim();
-          else is_valid = false;
+          func.nome_colaborador = temp.Trim();
+        }
+        else is_valid = false;
         temp = worksheet.GetValue<string>(row, 7);
         if(this.is_valid(temp, row, "Mat. Mot.", ExpectedType.Number))
+        {
           composicao.id_motorista = Int32.Parse(temp);
-          else is_valid = false;
+          func.matricula = Int32.Parse(temp);
+        }
+        else is_valid = false;
+        func.funcao = TipoFuncionario.ELETRICISTA;
+        if(!this.if_exist(func))
+        {
+          this.erros.Add(new ErroValidacao(row, "Motorista", $"{func.matricula}: {func.nome_colaborador}", "Funcionário não foi encontrado na lista ou nome não corresponde a matrícula!"));
+          is_valid = false;
+        }
+        func = new Funcionario();
         temp = worksheet.GetValue<string>(row, 8);
         if(this.is_valid(temp, row, "Ajudante", ExpectedType.Text))
+        {
           composicao.ajudante = temp.Trim();
-          else is_valid = false;
+          func.nome_colaborador = temp.Trim();
+        }
+        else is_valid = false;
         temp = worksheet.GetValue<string>(row, 9);
         if(this.is_valid(temp, row, "Mat. Aju.", ExpectedType.Number))
+        {
           composicao.id_ajudante = Int32.Parse(temp);
-          else is_valid = false;
+          func.matricula = Int32.Parse(temp);
+        }
+        else is_valid = false;
+        func.funcao = TipoFuncionario.ELETRICISTA;
+        if(!this.if_exist(func))
+        {
+          this.erros.Add(new ErroValidacao(row, "Ajudante", $"{func.matricula}: {func.nome_colaborador}", "Funcionário não foi encontrado na lista ou nome não corresponde a matrícula!"));
+          is_valid = false;
+        }
         temp = worksheet.GetValue<string>(row, 10);
         if(this.is_valid(temp, row, "Telefone", ExpectedType.Number))
         {
@@ -184,14 +212,27 @@ public class FileManager
           else composicao.telefone = Int64.Parse(temp);
         }
         else is_valid = false;
+        func = new Funcionario();
         temp = worksheet.GetValue<string>(row, 11);
         if(this.is_valid(temp, row, "Mat. Sup.", ExpectedType.Number))
+        {
           composicao.id_supervisor = Int32.Parse(temp);
-          else is_valid = false;
+          func.matricula = Int32.Parse(temp);
+        }
+        else is_valid = false;
         temp = worksheet.GetValue<string>(row, 12);
         if(this.is_valid(temp, row, "Supervisor", ExpectedType.Text))
+        {
           composicao.supervisor = temp.Trim();
-          else is_valid = false;
+          func.nome_colaborador = temp.Trim();
+        }
+        else is_valid = false;
+        func.funcao = TipoFuncionario.SUPERVISOR;
+        if(!this.if_exist(func))
+        {
+          this.erros.Add(new ErroValidacao(row, "Supervisor", $"{func.matricula}: {func.nome_colaborador}", "Funcionário não foi encontrado na lista ou nome não corresponde a matrícula!"));
+          is_valid = false;
+        }
         temp = worksheet.GetValue<string>(row, 13);
         if(this.is_valid(temp, row, "Atividade", ExpectedType.Enum))
           composicao.regional = Enum.Parse<Regional>(temp
@@ -264,6 +305,14 @@ public class FileManager
       default:
         return false;
     }
+  }
+  private bool if_exist(Funcionario funcionario)
+  {
+    var func = this.database.funcionario.Find(funcionario.matricula);
+    if(func == null) return false;
+    if(!(func.nome_colaborador == funcionario.nome_colaborador)) return false;
+    if(!(func.funcao == funcionario.funcao)) return false;
+    return true;
   }
   private enum ExpectedType {Text, Number, Date, Time, Enum}
 }
