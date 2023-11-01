@@ -11,7 +11,5 @@ public enum Atividade {
 public enum Regional
 {
   BAIXADA = 0,
-  [EnumMember(Value = "CAMPO GRANDE")]
-  OESTE = 1,
-  JACAREPAGUA = 1
+  OESTE = 1
 }

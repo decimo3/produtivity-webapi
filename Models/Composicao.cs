@@ -34,7 +34,6 @@ public class Composicao : IEntity, IValidatableObject
   public string supervisor { get; set; }
   [Required]
   public Regional regional { get; set; }
-
   public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
   {
     var results = new List<ValidationResult>();
