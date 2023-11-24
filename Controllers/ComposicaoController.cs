@@ -33,14 +33,14 @@ namespace backend.Controllers
         }
 
         // GET: api/Composicao/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Composicao>> GetComposicao(string id)
+        [HttpGet("{data}/{recurso}")]
+        public async Task<ActionResult<Composicao>> GetComposicao(DateOnly data, string recurso)
         {
           if (_context.composicao == null)
           {
               return NotFound();
           }
-            var composicao = await _context.composicao.FindAsync(id);
+            var composicao = await _context.composicao.FindAsync(data, recurso);
 
             if (composicao == null)
             {
@@ -52,23 +52,41 @@ namespace backend.Controllers
 
         // PUT: api/Composicao/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutComposicao(string id, Composicao composicao)
+        [HttpPut("{data}/{recurso}")]
+        public async Task<IActionResult> PutComposicao(DateOnly data, string recurso, Composicao composicao)
         {
-            if (id != composicao.recurso)
+            if (!ComposicaoExists(data, recurso))
             {
-                return BadRequest();
+                return NotFound();
             }
-
+            if (recurso != composicao.recurso)
+            {
+                if (ComposicaoExists(composicao.dia, composicao.recurso))
+                {
+                    return Conflict();
+                }
+                var c = await _context.composicao.FindAsync(data, recurso);
+                if (c == null) return NotFound();
+                _context.composicao.Remove(c);
+                _context.composicao.Add(composicao);
+                try
+                {
+                  await _context.SaveChangesAsync();
+                  return NoContent();
+                }
+                catch (DbUpdateConcurrencyException erro)
+                {
+                  return Problem(erro.InnerException?.Message);
+                }
+            }
             _context.Entry(composicao).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ComposicaoExists(id))
+                if (!ComposicaoExists(data, recurso))
                 {
                     return NotFound();
                 }
@@ -77,10 +95,8 @@ namespace backend.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
-
         // POST: api/Composicao
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -97,7 +113,7 @@ namespace backend.Controllers
             }
             catch (DbUpdateException)
             {
-                if (ComposicaoExists(composicao.recurso))
+                if (ComposicaoExists(composicao.dia, composicao.recurso))
                 {
                     return Conflict();
                 }
@@ -107,18 +123,18 @@ namespace backend.Controllers
                 }
             }
 
-            return CreatedAtAction("GetComposicao", new { id = composicao.recurso }, composicao);
+            return CreatedAtAction("GetComposicao", new { dia = composicao.dia, recurso = composicao.recurso }, composicao);
         }
 
         // DELETE: api/Composicao/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComposicao(string id)
+        [HttpDelete("{data}/{recurso}")]
+        public async Task<IActionResult> DeleteComposicao(DateOnly data, string recurso)
         {
             if (_context.composicao == null)
             {
                 return NotFound();
             }
-            var composicao = await _context.composicao.FindAsync(id);
+            var composicao = await _context.composicao.FindAsync(data, recurso);
             if (composicao == null)
             {
                 return NotFound();
