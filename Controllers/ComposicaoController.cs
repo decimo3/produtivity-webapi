@@ -146,9 +146,30 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        private bool ComposicaoExists(string id)
+        private bool ComposicaoExists(DateOnly data, string recurso)
         {
-            return (_context.composicao?.Any(e => e.recurso == id)).GetValueOrDefault();
+            return (_context.composicao?.Any(e => e.recurso == recurso && e.dia == data)).GetValueOrDefault();
+        }
+        [HttpPost(Name = "ComposicaoArquivo")]
+        public IActionResult Post(IFormFile file)
+        {
+            var filemanager = new FileManager(_context, file);
+            var composicoes = filemanager.Composicao();
+            if(filemanager.erros.Count > 0) return BadRequest(filemanager.erros);
+            _context.AddRange(composicoes);
+            try
+            {
+              _context.SaveChanges();
+              return CreatedAtAction("GetComposicao", null, composicoes);
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
+            {
+              return BadRequest(erro.InnerException?.Message);
+            }
+            catch (System.Exception erro)
+            {
+              return Problem(erro.Message);
+            }
         }
     }
 }
