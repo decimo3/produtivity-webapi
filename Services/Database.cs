@@ -30,7 +30,7 @@ public class Database : DbContext
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     // TODO: Implement database modeling
-    modelBuilder.Entity<Composicao>().HasKey(o => new {o.recurso, o.dia});
+    modelBuilder.Entity<Composicao>().HasKey(o => new {o.dia, o.recurso});
   }
   public DbSet<Composicao> composicao { get; set; }
   public DbSet<Servico> relatorio { get; set; }
