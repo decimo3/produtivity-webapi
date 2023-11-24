@@ -9,44 +9,23 @@ public class FileManager
 {
   private readonly IFormFile file;
   public readonly List<ErroValidacao> erros;
-  public readonly List<IEntity> list;
   private readonly Database database;
+  private readonly Stream stream;
   public FileManager(Database database, IFormFile file)
   {
     this.database = database;
     this.erros = new();
-    this.list = new();
     this.file = file;
-    if(this.is_valid())
-    {
-      if(true_if_xls_false_if_csv_null_if_neither() == true)
-        this.list = Composicao(this.file.OpenReadStream()).Cast<IEntity>().ToList();
-      if(true_if_xls_false_if_csv_null_if_neither() == false)
-        this.list = Relatorio(this.file.OpenReadStream()).Cast<IEntity>().ToList();
-    }
-  }
-  private bool is_valid()
-  {
     if(file.Length == 0)
     {
       erros.Add(new ErroValidacao(0, null, null, "O arquivo enviado está vazio!"));
-      return false;
     }
-    if(true_if_xls_false_if_csv_null_if_neither() is null)
+    else
     {
-      erros.Add(new ErroValidacao(0, null, null, "O formato de arquivo é inválido!"));
-      return false;
+      this.stream = this.file.OpenReadStream();
     }
-    return true;
   }
-  private bool? true_if_xls_false_if_csv_null_if_neither()
-  {
-    string ext = Path.GetExtension(file.FileName);
-    if(ext == ".xlsx") return true;
-    if(ext == ".csv") return false;
-    return null;
-  }
-  public StreamReader Sanitizacao(Stream stream)
+  private StreamReader Sanitizacao()
   {
     var reader = new StreamReader(stream);
     var memory = new MemoryStream();
@@ -73,9 +52,11 @@ public class FileManager
     memory.Position = 0;
     return new StreamReader(memory);
   }
-  public List<Servico> Relatorio(Stream stream)
+  public List<Servico> Relatorio()
   {
-    using var streamsanitizado = Sanitizacao(stream);
+    string ext = Path.GetExtension(file.FileName);
+    if (ext != ".csv") throw new InvalidOperationException("Tipo de arquivo inválido!");
+    using var streamsanitizado = Sanitizacao();
     var servicos = new List<Servico>();
     {
       while (!streamsanitizado.EndOfStream)
@@ -108,8 +89,10 @@ public class FileManager
     }
     return servicos;
   }
-  public List<Composicao> Composicao(Stream stream)
+  public List<Composicao> Composicao()
   {
+    string ext = Path.GetExtension(file.FileName);
+    if (ext != ".xlsx") throw new InvalidOperationException("Tipo de arquivo inválido!");
     var composicoes = new List<Composicao>();
     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
     using (var reader = new ExcelPackage(stream))
@@ -265,7 +248,6 @@ public class FileManager
     switch(expectedType)
     {
       case ExpectedType.Date:
-
         if(!DateOnly.TryParse(arg[0..9], out DateOnly dia))
         {
           this.erros.Add(new ErroValidacao(linha, campo, arg, "A data não pode ser reconhecida!"));
