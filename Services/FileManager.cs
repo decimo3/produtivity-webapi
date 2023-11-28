@@ -100,172 +100,161 @@ public class FileManager
         throw new InvalidOperationException($"O arquivo enviado tem colunas a {maisoumenos} que o padrão!");
       }
       var rowCount = worksheet.Dimension.Rows;
-      string temp;
+      string? temp, test;
       for(int row = 2; row < rowCount; row++)
       {
         var composicao = new Composicao();
         var is_valid = true;
-        temp = worksheet.GetValue<DateTime>(row, 1).ToString();
-        if(this.is_valid(temp, row, "Dia", ExpectedType.Date))
-          composicao.dia = DateOnly.Parse(temp[0..9]);
-          else is_valid = false;
+        // TODO: Converter número inteiro de data formato Excel em DateOnly de DotNet
+
+        temp = worksheet.GetValue<string>(row, 1);
+        test = this.is_valid(temp, row, "Dia", ExpectedType.Date);
+        if (test == null) composicao.dia = DateOnly.Parse(temp[0..9]);
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 2);
-        if(this.is_valid(temp, row, "Adesivo", ExpectedType.Number))
-          composicao.adesivo = Int32.Parse(temp);
-          else is_valid = false;
+        test = this.is_valid(temp, row, "Adesivo", ExpectedType.Number);
+        if (test == null) composicao.adesivo = Int32.Parse(temp);
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 3);
-        if(this.is_valid(temp, row, "Placa", ExpectedType.Text))
-          composicao.placa = temp.Replace("-", "").Replace(" ", "");
-          else is_valid = false;
+        test = this.is_valid(temp, row, "Placa", ExpectedType.Text);
+        if (test == null) composicao.placa = temp.Replace("-", "").Replace(" ", "");
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 4);
-        if(this.is_valid(temp, row, "Recurso", ExpectedType.Text))
-          composicao.recurso = temp.Trim();
-          else is_valid = false;
+        test = this.is_valid(temp, row, "Recurso", ExpectedType.Text);
+        if(test == null) composicao.recurso = temp.Trim();
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 5);
-        if(this.is_valid(temp, row, "Atividade", ExpectedType.Enum))
+        test = this.is_valid(temp, row, "Atividade", ExpectedType.Enum);
+        if(test == null)
           composicao.atividade = Enum.Parse<Atividade>(temp
             .Replace("RELIGA POSTO", "AVANCADO")
             .Replace("RELIGA CAMINHÃO", "CAMINHAO")
             .Replace("EMERGÊNCIA", "EMERGENCIA"));
-          else is_valid = false;
-        temp = worksheet.GetValue<string>(row, 6);
+        else composicao.validacao.Add(test);
+
         var func = new Funcionario();
-        if(this.is_valid(temp, row, "Motorista", ExpectedType.Text))
+
+        temp = worksheet.GetValue<string>(row, 6);
+        test = this.is_valid(temp, row, "Motorista", ExpectedType.Text);
+        if(test == null)
         {
           composicao.motorista = temp.Trim();
           func.nome_colaborador = temp.Trim();
         }
-        else is_valid = false;
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 7);
-        if(this.is_valid(temp, row, "Mat. Mot.", ExpectedType.Number))
+        test = this.is_valid(temp, row, "Mat. Mot.", ExpectedType.Number);
+        if(test == null)
         {
           composicao.id_motorista = Int32.Parse(temp);
           func.matricula = Int32.Parse(temp);
         }
-        else is_valid = false;
+        else composicao.validacao.Add(test);
+
         func.funcao = TipoFuncionario.ELETRICISTA;
-        if(!this.if_exist(func))
-        {
-          this.erros.Add(new ErroValidacao(row, "Motorista", $"{func.matricula}: {func.nome_colaborador}", "Funcionário não foi encontrado na lista ou nome não corresponde a matrícula!"));
-          is_valid = false;
-        }
+        if(!this.if_exist(func)) composicao.validacao.Add($"{func.matricula}: {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+
         func = new Funcionario();
+
         temp = worksheet.GetValue<string>(row, 8);
-        if(this.is_valid(temp, row, "Ajudante", ExpectedType.Text))
+        test = this.is_valid(temp, row, "Ajudante", ExpectedType.Text);
+        if (test == null)
         {
           composicao.ajudante = temp.Trim();
           func.nome_colaborador = temp.Trim();
         }
-        else is_valid = false;
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 9);
-        if(this.is_valid(temp, row, "Mat. Aju.", ExpectedType.Number))
+        test = this.is_valid(temp, row, "Mat. Aju.", ExpectedType.Number);
+        if(test == null)
         {
           composicao.id_ajudante = Int32.Parse(temp);
           func.matricula = Int32.Parse(temp);
         }
-        else is_valid = false;
+        else composicao.validacao.Add(test);
+
         func.funcao = TipoFuncionario.ELETRICISTA;
-        if(!this.if_exist(func))
-        {
-          this.erros.Add(new ErroValidacao(row, "Ajudante", $"{func.matricula}: {func.nome_colaborador}", "Funcionário não foi encontrado na lista ou nome não corresponde a matrícula!"));
-          is_valid = false;
-        }
+        if (!this.if_exist(func)) composicao.validacao.Add($"{func.matricula}: {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+
         temp = worksheet.GetValue<string>(row, 10);
-        if(this.is_valid(temp, row, "Telefone", ExpectedType.Number))
+        test = this.is_valid(temp, row, "Telefone", ExpectedType.Number);
+        if(test == null)
         {
           temp = temp.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
-          if(temp.Length == 9) temp = "5521" + temp;
-          if(temp.Length == 11) temp = "55" + temp;
-          if(temp.Length != 13)
-          {
-            this.erros.Add(new ErroValidacao(row, "Telefone", temp, "O número de telefone não é válido!"));
-            is_valid = false;
-          }
+          if(temp.Length == 9) temp = "21" + temp;
+          if(temp.Length != 11) composicao.validacao.Add("A quantidade de dígitos do telefone está errada!");
           else composicao.telefone = Int64.Parse(temp);
         }
-        else is_valid = false;
+        else composicao.validacao.Add("O número de telefone não é válido!");
+
         func = new Funcionario();
+
         temp = worksheet.GetValue<string>(row, 11);
-        if(this.is_valid(temp, row, "Mat. Sup.", ExpectedType.Number))
+        test = this.is_valid(temp, row, "Mat. Sup.", ExpectedType.Number);
+        if(test == null)
         {
           composicao.id_supervisor = Int32.Parse(temp);
           func.matricula = Int32.Parse(temp);
         }
-        else is_valid = false;
+        else composicao.validacao.Add(test);
+
         temp = worksheet.GetValue<string>(row, 12);
-        if(this.is_valid(temp, row, "Supervisor", ExpectedType.Text))
+        test = this.is_valid(temp, row, "Supervisor", ExpectedType.Text);
+        if(test == null)
         {
           composicao.supervisor = temp.Trim();
           func.nome_colaborador = temp.Trim();
         }
-        else is_valid = false;
+        else composicao.validacao.Add(test);
+
         func.funcao = TipoFuncionario.SUPERVISOR;
-        if(!this.if_exist(func))
-        {
-          this.erros.Add(new ErroValidacao(row, "Supervisor", $"{func.matricula}: {func.nome_colaborador}", "Funcionário não foi encontrado na lista ou nome não corresponde a matrícula!"));
-          is_valid = false;
-        }
+        if(!this.if_exist(func)) composicao.validacao.Add($"{func.matricula}: {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+
         temp = worksheet.GetValue<string>(row, 13);
-        if(this.is_valid(temp, row, "Atividade", ExpectedType.Enum))
+        test = this.is_valid(temp, row, "Atividade", ExpectedType.Enum);
+        if(test == null)
           composicao.regional = Enum.Parse<Regional>(temp
             .Replace("CAMPO GRANDE", "OESTE")
             .Replace("JACAREPAGUA", "OESTE"));
-          else is_valid = false;
-        if(is_valid) composicoes.Add(composicao);
+        else composicao.validacao.Add(test);
+
+        composicoes.Add(composicao);
       }
     }
     return composicoes;
   }
-  private bool is_valid(string? arg, int linha, string campo, ExpectedType expectedType)
+  private string? is_valid(string? arg, int linha, string campo, ExpectedType expectedType)
   {
-    if(arg == null)
-    {
-      this.erros.Add(new ErroValidacao(linha, campo, arg, "O valor não foi preenchido!"));
-      return false;
-    }
+    if(arg == null) return "O valor não foi preenchido!";
     arg = arg.Trim();
     switch(expectedType)
     {
       case ExpectedType.Date:
-        if(!DateOnly.TryParse(arg[0..9], out DateOnly dia))
-        {
-          this.erros.Add(new ErroValidacao(linha, campo, arg, "A data não pode ser reconhecida!"));
-          return false;
-        }
-        return true;
+        var data = new DateOnly();
+        if(!DateOnly.TryParse(arg, out DateOnly dia)) return "A data não pode ser reconhecida!";
+      break;
       case ExpectedType.Time:
-        if(!TimeOnly.TryParse(arg, out TimeOnly hrs))
-        {
-          this.erros.Add(new ErroValidacao(linha, campo, arg, "A hora não pode ser reconhecida!"));
-          return false;
-        }
-        return true;
+        if(!TimeOnly.TryParse(arg, out TimeOnly hrs)) return "A hora não pode ser reconhecida!";
+      break;
       case ExpectedType.Number:
         arg = arg.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
-        if(!Int64.TryParse(arg, out Int64 num))
-        {
-          this.erros.Add(new ErroValidacao(linha, campo, arg, "A número contém caracteres inválidos!"));
-          return false;
-        }
-        return true;
+        if(!Int64.TryParse(arg, out Int64 num)) return "A número contém caracteres inválidos!";
+      break;
       case ExpectedType.Text:
-        if(arg.Length < 5)
-        {
-          this.erros.Add(new ErroValidacao(linha, campo, arg, "O texto está incompleto ou vazio!"));
-          return false;
-        }
-        return true;
+        if(arg.Length < 5) return "O texto está incompleto ou vazio!";
+      break;
       case ExpectedType.Enum:
         String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA"};
-        if(!enums.Contains(arg))
-        {
-          this.erros.Add(new ErroValidacao(linha, campo, arg, "O texto encontrado não corresponde com o padrão!"));
-          return false;
-        }
-        return true;
-      default:
-        return false;
+        if(!enums.Contains(arg)) return "O texto encontrado não corresponde com o padrão!";
+      break;
     }
+    return null;
   }
   private bool if_exist(Funcionario funcionario)
   {
