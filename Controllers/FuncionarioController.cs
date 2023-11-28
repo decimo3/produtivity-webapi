@@ -83,7 +83,7 @@ namespace backend.Controllers
               }
               catch (DbUpdateConcurrencyException erro)
               {
-                Problem(erro.InnerException.Message);
+                Problem(erro.InnerException?.Message);
               }
               return NoContent();
             }
