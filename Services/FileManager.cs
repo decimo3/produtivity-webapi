@@ -8,19 +8,13 @@ namespace backend.Services;
 public class FileManager
 {
   private readonly IFormFile file;
-  public readonly List<ErroValidacao> erros;
   private readonly Database database;
   private readonly Stream stream;
   public FileManager(Database database, IFormFile file)
   {
     this.database = database;
-    this.erros = new();
     this.file = file;
     this.stream = this.file.OpenReadStream();
-    if(file.Length == 0)
-    {
-      erros.Add(new ErroValidacao(0, null, null, "O arquivo enviado está vazio!"));
-    }
   }
   private StreamReader Sanitizacao()
   {
@@ -96,16 +90,14 @@ public class FileManager
     {
       if(reader.Workbook.Worksheets.Count > 1)
       {
-        this.erros.Add(new ErroValidacao(0, null, null, "O arquivo enviado tem mais de uma planilha!"));
-        return composicoes;
+        throw new InvalidOperationException("O arquivo enviado tem mais de uma planilha!");
       }
       var worksheet = reader.Workbook.Worksheets[0];
       var colCount = worksheet.Dimension.Columns;
       if(colCount != 13)
       {
         var maisoumenos = (colCount > 13) ? "mais" : "menos";
-        this.erros.Add(new ErroValidacao(0, null, null, $"O arquivo enviado tem colunas a {maisoumenos} que o padrão!"));
-        return composicoes;
+        throw new InvalidOperationException($"O arquivo enviado tem colunas a {maisoumenos} que o padrão!");
       }
       var rowCount = worksheet.Dimension.Rows;
       string temp;
