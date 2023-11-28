@@ -9,7 +9,6 @@ public class Composicao
   [Range(11400, 17000, ErrorMessage = "O valor do adesivo não é válido!")]
   public int adesivo { get; set; }
   [Required]
-  [RegularExpression("^([A-z0-9]{3})-([A-z0-9]{4})$", ErrorMessage = "A placa informada não é valida ou não está escrita no padrão (AAA-BBBB)!")]
   public string? placa { get; set; }
   [Required]
   [StringLength(32, ErrorMessage = "O nome do recurso é muito longo!")]
