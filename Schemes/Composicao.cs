@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace backend.Models;
-public class Composicao : IEntity, IValidatableObject
+public class Composicao
 {
   [Required]
   public DateOnly dia { get; set; }
@@ -34,9 +35,6 @@ public class Composicao : IEntity, IValidatableObject
   public string supervisor { get; set; }
   [Required]
   public Regional regional { get; set; }
-  public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-  {
-    var results = new List<ValidationResult>();
-    return results;
-  }
+  [NotMapped]
+  public List<string> validacao { get; set; }
 }
