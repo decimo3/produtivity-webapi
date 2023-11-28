@@ -153,14 +153,19 @@ namespace backend.Controllers
         [HttpPost(Name = "ComposicaoArquivo")]
         public IActionResult Post(IFormFile file)
         {
+            if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
             var filemanager = new FileManager(_context, file);
-            var composicoes = filemanager.Composicao();
-            if(filemanager.erros.Count > 0) return BadRequest(filemanager.erros);
-            _context.AddRange(composicoes);
+            // TODO: Adicionar verificações se há erros.
             try
             {
+              var composicoes = filemanager.Composicao();
+              _context.AddRange(composicoes);
               _context.SaveChanges();
               return CreatedAtAction("GetComposicao", null, composicoes);
+            }
+            catch (System.InvalidOperationException erro)
+            {
+              return BadRequest(erro);
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
             {
