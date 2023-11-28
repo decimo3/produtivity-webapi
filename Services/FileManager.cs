@@ -16,13 +16,10 @@ public class FileManager
     this.database = database;
     this.erros = new();
     this.file = file;
+    this.stream = this.file.OpenReadStream();
     if(file.Length == 0)
     {
       erros.Add(new ErroValidacao(0, null, null, "O arquivo enviado está vazio!"));
-    }
-    else
-    {
-      this.stream = this.file.OpenReadStream();
     }
   }
   private StreamReader Sanitizacao()
@@ -222,16 +219,6 @@ public class FileManager
             .Replace("CAMPO GRANDE", "OESTE")
             .Replace("JACAREPAGUA", "OESTE"));
           else is_valid = false;
-        var validacaoContexto = new ValidationContext(composicao);
-        var errosValidacao = composicao.Validate(validacaoContexto);
-        if(errosValidacao.Any())
-        {
-          foreach (var erro in errosValidacao)
-          {
-            this.erros.Add(new ErroValidacao(row, null, null, erro.ErrorMessage));
-          }
-          is_valid = false;
-        }
         if(is_valid) composicoes.Add(composicao);
       }
     }
