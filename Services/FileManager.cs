@@ -104,12 +104,22 @@ public class FileManager
       for(int row = 2; row < rowCount; row++)
       {
         var composicao = new Composicao();
-        var is_valid = true;
-        // TODO: Converter número inteiro de data formato Excel em DateOnly de DotNet
 
         temp = worksheet.GetValue<string>(row, 1);
         test = this.is_valid(temp, row, "Dia", ExpectedType.Date);
-        if (test == null) composicao.dia = DateOnly.Parse(temp[0..9]);
+        if (test == null)
+        {
+          try
+          {
+            composicao.dia = DateOnly.Parse(temp[0..9]);
+          }
+          catch
+          {
+            var a = Int32.Parse(temp);
+            var b = DateTime.FromOADate(a);
+            composicao.dia = DateOnly.FromDateTime(b);
+          }
+        }
         else composicao.validacao.Add(test);
 
         temp = worksheet.GetValue<string>(row, 2);
@@ -236,8 +246,19 @@ public class FileManager
     switch(expectedType)
     {
       case ExpectedType.Date:
-        var data = new DateOnly();
-        if(!DateOnly.TryParse(arg, out DateOnly dia)) return "A data não pode ser reconhecida!";
+        if (Int32.TryParse(arg, out Int32 diaExcel))
+        {
+          try
+          {
+              DateTime.FromOADate(diaExcel);
+              return null;
+          }
+          catch
+          {
+              return "A data não pode ser reconhecida!";
+          }
+        }
+        if(!DateOnly.TryParse(arg, out DateOnly diaTexto)) return "A data não pode ser reconhecida!";
       break;
       case ExpectedType.Time:
         if(!TimeOnly.TryParse(arg, out TimeOnly hrs)) return "A hora não pode ser reconhecida!";
@@ -253,6 +274,10 @@ public class FileManager
         String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA"};
         if(!enums.Contains(arg)) return "O texto encontrado não corresponde com o padrão!";
       break;
+      case ExpectedType.Placa:
+        var re = new System.Text.RegularExpressions.Regex("^[0-9A-Z]{3}-[0-9A-Z]{4}$");
+        if (!re.IsMatch(arg)) return "O padrão da placa não está sendo obedecido! (I2E-AAAA)";
+      break;
     }
     return null;
   }
@@ -264,5 +289,5 @@ public class FileManager
     if(!(func.funcao == funcionario.funcao)) return false;
     return true;
   }
-  private enum ExpectedType {Text, Number, Date, Time, Enum}
+  private enum ExpectedType {Text, Number, Date, Time, Enum, Placa}
 }
