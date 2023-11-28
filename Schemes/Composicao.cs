@@ -10,19 +10,19 @@ public class Composicao
   public int adesivo { get; set; }
   [Required]
   [RegularExpression("^([A-z0-9]{3})-([A-z0-9]{4})$", ErrorMessage = "A placa informada não é valida ou não está escrita no padrão (AAA-BBBB)!")]
-  public string placa { get; set; }
+  public string? placa { get; set; }
   [Required]
   [StringLength(32, ErrorMessage = "O nome do recurso é muito longo!")]
   public string recurso { get; set; }
   [Required]
   public Atividade atividade { get; set; }
   [Required]
-  public string motorista { get; set; }
+  public string? motorista { get; set; }
   [Required]
   [RegularExpression("^[0-9]{7}$")]
   public int id_motorista { get; set; }
   [Required]
-  public string ajudante { get; set; }
+  public string? ajudante { get; set; }
   [Required]
   [RegularExpression("^[0-9]{7}$")]
   public int id_ajudante { get; set; }
@@ -32,9 +32,14 @@ public class Composicao
   [RegularExpression("^[0-9]{7}$")]
   public int id_supervisor { get; set; }
   [Required]
-  public string supervisor { get; set; }
+  public string? supervisor { get; set; }
   [Required]
   public Regional regional { get; set; }
   [NotMapped]
   public List<string> validacao { get; set; }
+  public Composicao()
+  {
+    this.recurso = "";
+    this.validacao = new();
+  }
 }
