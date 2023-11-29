@@ -107,19 +107,7 @@ public class FileManager
 
         temp = worksheet.GetValue<string>(row, 1);
         test = this.is_valid(temp, row, "Dia", ExpectedType.Date);
-        if (test == null)
-        {
-          try
-          {
-            composicao.dia = DateOnly.Parse(temp[0..9]);
-          }
-          catch
-          {
-            var a = Int32.Parse(temp);
-            var b = DateTime.FromOADate(a);
-            composicao.dia = DateOnly.FromDateTime(b);
-          }
-        }
+        if (test == null) composicao.dia = DateOnly.FromDateTime(DateTime.Parse(temp));
         else composicao.validacao.Add(test);
 
         temp = worksheet.GetValue<string>(row, 2);
@@ -241,24 +229,12 @@ public class FileManager
   }
   private string? is_valid(string? arg, int linha, string campo, ExpectedType expectedType)
   {
-    if(arg == null) return "O valor não foi preenchido!";
+    if(arg == null) return $"O campo {campo} não foi preenchido!";
     arg = arg.Trim();
     switch(expectedType)
     {
       case ExpectedType.Date:
-        if (Int32.TryParse(arg, out Int32 diaExcel))
-        {
-          try
-          {
-              DateTime.FromOADate(diaExcel);
-              return null;
-          }
-          catch
-          {
-              return "A data não pode ser reconhecida!";
-          }
-        }
-        if(!DateOnly.TryParse(arg, out DateOnly diaTexto)) return "A data não pode ser reconhecida!";
+        if(!DateTime.TryParse(arg, out DateTime diaTexto)) return "A data não pode ser reconhecida!";
       break;
       case ExpectedType.Time:
         if(!TimeOnly.TryParse(arg, out TimeOnly hrs)) return "A hora não pode ser reconhecida!";
