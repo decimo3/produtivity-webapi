@@ -155,17 +155,20 @@ namespace backend.Controllers
         {
             if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
             var filemanager = new FileManager(_context, file);
-            // TODO: Adicionar verificações se há erros.
             try
             {
               var composicoes = filemanager.Composicao();
+              if (composicoes.Where(c => c.validacao.Any()).Any())
+              {
+                return UnprocessableEntity(composicoes);
+              }
               _context.AddRange(composicoes);
               _context.SaveChanges();
               return CreatedAtAction("GetComposicao", null, composicoes);
             }
             catch (System.InvalidOperationException erro)
             {
-              return BadRequest(erro);
+              return BadRequest(erro.Message);
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
             {
