@@ -47,8 +47,7 @@ namespace backend.Controllers
         [HttpGet]
         public ActionResult GetServico()
         {
-          var relatorios = from f in _context.relatorio group f by f.filename into g select new {filename = g.Key, servicos = g.Count(x => x.servico > 0 && x.status != TipoStatus.cancelado), recursos = g.Count(x => x.tipo_atividade == "Início de turno"), dia = g.First().dia};
-          Console.WriteLine(relatorios);
+          var relatorios = from f in _context.relatorio orderby f.dia descending group f by f.filename into g orderby g.Key descending select new {filename = g.Key, servicos = g.Count(x => x.servico > 0 && x.status != TipoStatus.cancelado), recursos = g.Count(x => x.tipo_atividade == "Início de turno"), dia = g.First().dia};
           return Ok(relatorios);
         }
         [HttpDelete("{filename}")]
