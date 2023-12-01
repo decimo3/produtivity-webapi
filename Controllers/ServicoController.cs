@@ -54,7 +54,22 @@ namespace backend.Controllers
         [HttpDelete("{filename}")]
         public ActionResult DeleteServico(string filename)
         {
-          return NoContent();
+          try
+          {
+            var relatorio = _context.relatorio.Where(x => x.filename == filename);
+            if(!relatorio.Any()) return NotFound();
+            _context.relatorio.RemoveRange(relatorio);
+            _context.SaveChanges();
+            return NoContent();
+          }
+          catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
+          {
+            return BadRequest(erro.InnerException?.Message);
+          }
+          catch (System.Exception erro)
+          {
+            return Problem(erro.Message);
+          }
         }
     }
 }
