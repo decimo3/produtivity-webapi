@@ -47,7 +47,7 @@ namespace backend.Controllers
         [HttpGet]
         public ActionResult GetServico()
         {
-          var relatorios = from f in _context.relatorio group f by f.filename into g select new {filename = g.Key, servicos = g.Count(x => x.servico > 0), recursos = g.Key.Distinct().Count(), dia = g.First().dia };
+          var relatorios = from f in _context.relatorio group f by f.filename into g select new {filename = g.Key, servicos = g.Count(x => x.servico > 0 && x.status != TipoStatus.cancelado), recursos = g.Count(x => x.tipo_atividade == "Início de turno"), dia = g.First().dia};
           Console.WriteLine(relatorios);
           return Ok(relatorios);
         }
