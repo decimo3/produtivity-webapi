@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using backend.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyModel.Resolution;
@@ -34,7 +35,7 @@ public class FileManager
       }
       if (letra == ',' && insideField == true)
       {
-        writer.Write(' ');
+        writer.Write('.');
         continue;
       }
       writer.Write(letra);
@@ -57,24 +58,81 @@ public class FileManager
         line = line.Replace("\"", "");
         var values = line.Split(',');
         if(values[0] == "Recurso") continue;
-        if(!Int32.TryParse(values[21], out int nota)) continue;
+        TipoStatus status;
+        switch(values[3]) {
+          case "não concluído": status = TipoStatus.rejeitado; break;
+          case "concluído": status = TipoStatus.concluido; break;
+          case "em rota": status = TipoStatus.deslocando; break;
+          default: status = Enum.Parse<TipoStatus>(values[3]); break;
+        }
+        TipoInstalacao? fases;
+        switch(values[64]) {
+          case "Monofásico": fases = TipoInstalacao.Monofasico; break;
+          case "Bifásico": fases = TipoInstalacao.Bifasico; break;
+          case "Trifásico": fases = TipoInstalacao.Trifasico; break;
+          default: fases = null; break;
+        }
+        if(values[59].Split(' ')[0] == "20.5") status = TipoStatus.concluido;
+        var codigos = (values[44] != String.Empty) ? values[44] : values[59].Split(' ')[0];
+        DateTime? vencimento = null;
+        var re = new Regex(@"(?<dia>\d{2})/(?<mes>\d{2})/(?<ano>\d{2}) (?<hor>\d{2}):(?<min>\d{2})");
+        if(re.IsMatch(values[15])) {
+          var ma = re.Match(values[15]);
+          var ano = Int32.Parse(ma.Groups["ano"].Value) + 2_000;
+          var mes = Int32.Parse(ma.Groups["mes"].Value);
+          var dia = Int32.Parse(ma.Groups["dia"].Value);
+          var hor = Int32.Parse(ma.Groups["hor"].Value);
+          var min = Int32.Parse(ma.Groups["min"].Value);
+          vencimento = new DateTime(year: ano, month: mes, day: dia, hour: hor, minute: min, second: 0);
+        }
         servicos.Add(new Servico {
+          filename = file.FileName,
           recurso = values[0],
           dia = DateOnly.Parse(values[1]),
           indentificador = Int32.Parse(values[2]),
+          status = status, // values[3] foi préviamente verificado e assinalado a variavel
+          nome_do_cliente = values[4],
+          endereco_destino = values[5],
+          cidade_destino = values[6],
+          // values[7] = "Estado" é desnecessário
+          codigo_postal = values[8],
+          // values[9] = telefone é sempre vazio
+          // values[10] = celular é sempre vazio
+          // values[11] = email é sempre vazio
           hora_inicio = TimeOnly.TryParse(values[12], out TimeOnly inicio) ? inicio : null,
           hora_final = TimeOnly.TryParse(values[13], out TimeOnly final) ? final : null,
-          duracao_feito = TimeOnly.TryParse(values[17], out TimeOnly duracao) ? duracao : null,
-          desloca_feito = TimeOnly.TryParse(values[18], out TimeOnly desloca) ? desloca : null,
+          // values[14] = "inicio-fim" é desnecessário
+          vencimento = vencimento, // values[15] foi préviamente verificado e assinalado a variavel
+          // values[16] = "inicio SLA" é sempre o mesmo
+          duracao_feito = TimeSpan.TryParse(values[17], out TimeSpan duracao) ? duracao : null,
+          desloca_feito = TimeSpan.TryParse(values[18], out TimeSpan desloca) ? desloca : null,
+          // values[19] = "tipo atividade" é sempre o mesmo
           tipo_atividade = values[20],
-          servico = nota,
+          servico = Int32.TryParse(values[21], out Int32 nota) ? nota : null,
+          area_trabalho = values[24],
+          // values[22..43] "multiplos" é desnecessário
+          codigos = codigos, // values[44, 59] foi préviamente verificado e assinalado a variavel
+          id_viatura = values[45],
+          id_motorista = Int32.TryParse(values[46], out Int32 id_mot) ? id_mot : null,
+          id_ajudante = Int32.TryParse(values[47], out Int32 id_aux) ? id_aux : null,
+          id_tecnico = Int32.TryParse(values[48], out Int32 id_tec) ? id_tec : null,
           observacao = values[49],
-          instalacao = Int32.TryParse(values[55], out int inst) ? inst : 0,
+          // values[50] "descrição para dano" é desnecessária
+          bairro_destino = values[51],
+          // values[52..54] "multiplos" é desnecessário
+          instalacao = Int32.TryParse(values[55], out Int32 inst) ? inst : null,
+          complemento_destino = values[56],
+          referencia_destino = values[57],
+          // values[58] "intervalo de tempo" é desnecessário
+          // values[59] "motivo rejeicao" já foi combinado com values[44] para gerar a variável "codigos"
           tipo_servico = values[60],
-          Desloca_estima = TimeOnly.TryParse("00:" + values[69], out TimeOnly desloca_est) ? desloca_est : null,
-          duracao_estima = TimeOnly.TryParse("00:" + values[70], out TimeOnly duracao_est) ? duracao_est : null,
-          codigos = (values[44] != String.Empty) ? values[44] : values[59].Split(' ')[0],
-          status = (values[3] == "não concluído" && values[59].Split(' ')[0] == "20.5") ? "concluído" : values[3],
+          // values[61] = "reserva de atividade" é desnecessário
+          debitos_cliente = Double.TryParse(values[62], out Double deb) ? deb : null,
+          // values[63..68] = "multiplos" é desnecessário
+          tipo_instalacao = fases,
+          Desloca_estima = TimeSpan.TryParse("00:" + values[69], out TimeSpan desloca_est) ? desloca_est : null,
+          duracao_estima = TimeSpan.TryParse("00:" + values[70], out TimeSpan duracao_est) ? duracao_est : null,
+          // values[71..75] = "multiplos" é desnecessário
         });
       }
     }
@@ -261,7 +319,7 @@ public class FileManager
   {
     var func = this.database.funcionario.Find(funcionario.matricula);
     if(func == null) return false;
-    if(!(func.nome_colaborador == funcionario.nome_colaborador)) return false;
+    if(!(func.nome_colaborador.ToLower() == funcionario.nome_colaborador.ToLower())) return false;
     if(!(func.funcao == funcionario.funcao)) return false;
     return true;
   }
