@@ -24,6 +24,9 @@ namespace backend.Controllers
         public async Task<ActionResult<IEnumerable<Composicao>>> Getcomposicao(DateOnly inicio, DateOnly final, Regional regional, Atividade atividade)
         {
           if (_context.composicao == null) return NotFound();
+          if (atividade == Atividade.NENHUM && regional == Regional.NENHUM) return await (from f in _context.composicao where (f.dia >= inicio) && (f.dia <= final) select f).ToListAsync();
+          if (regional == Regional.NENHUM && atividade != Atividade.NENHUM) return await (from f in _context.composicao where (f.dia >= inicio) && (f.dia <= final) && (f.atividade == atividade) select f).ToListAsync();
+          if (atividade == Atividade.NENHUM && regional != Regional.NENHUM) return await (from f in _context.composicao where (f.dia >= inicio) && (f.dia <= final) && (f.regional == regional) select f).ToListAsync();
           return await (from f in _context.composicao where (f.dia >= inicio) && (f.dia <= final) && (f.regional == regional) && (f.atividade == atividade) select f).ToListAsync();
         }
         // PUT: api/Composicao/5
