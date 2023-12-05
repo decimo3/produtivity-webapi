@@ -15,41 +15,17 @@ namespace backend.Controllers
     public class ComposicaoController : ControllerBase
     {
         private readonly Database _context;
-
         public ComposicaoController(Database context)
         {
             _context = context;
         }
-
         // GET: api/Composicao
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Composicao>>> Getcomposicao()
+        [HttpGet("{inicio}/{final}/{regional}/{atividade}")]
+        public async Task<ActionResult<IEnumerable<Composicao>>> Getcomposicao(DateOnly inicio, DateOnly final, Regional regional, Atividade atividade)
         {
-          if (_context.composicao == null)
-          {
-              return NotFound();
-          }
-            return await _context.composicao.ToListAsync();
+          if (_context.composicao == null) return NotFound();
+          return await (from f in _context.composicao where (f.dia >= inicio) && (f.dia <= final) && (f.regional == regional) && (f.atividade == atividade) select f).ToListAsync();
         }
-
-        // GET: api/Composicao/5
-        [HttpGet("{data}/{recurso}")]
-        public async Task<ActionResult<Composicao>> GetComposicao(DateOnly data, string recurso)
-        {
-          if (_context.composicao == null)
-          {
-              return NotFound();
-          }
-            var composicao = await _context.composicao.FindAsync(data, recurso);
-
-            if (composicao == null)
-            {
-                return NotFound();
-            }
-
-            return composicao;
-        }
-
         // PUT: api/Composicao/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{data}/{recurso}")]
