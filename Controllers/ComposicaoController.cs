@@ -75,31 +75,36 @@ namespace backend.Controllers
         }
         // POST: api/Composicao
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Composicao>> PostComposicao(Composicao composicao)
+        [HttpPost("Formulario")]
+        [ActionName("PostFormulario")]
+        public ActionResult PostComposicao(Composicao composicao)
         {
           if (_context.composicao == null)
           {
               return Problem("Entity set 'Database.composicao'  is null.");
           }
-            _context.composicao.Add(composicao);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ComposicaoExists(composicao.dia, composicao.recurso))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetComposicao", new { dia = composicao.dia, recurso = composicao.recurso }, composicao);
+          if (ComposicaoExists(composicao.dia, composicao.recurso))
+          {
+              return Conflict();
+          }
+          _context.composicao.Add(composicao);
+          try
+          {
+            _context.SaveChangesAsync();
+            return Created("/Composicao", composicao);
+          }
+          catch (System.InvalidOperationException erro)
+          {
+            return BadRequest(erro.Message);
+          }
+          catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
+          {
+            return BadRequest(erro.InnerException?.Message);
+          }
+          catch (System.Exception erro)
+          {
+            return Problem(erro.Message);
+          }
         }
 
         // DELETE: api/Composicao/5
@@ -126,8 +131,9 @@ namespace backend.Controllers
         {
             return (_context.composicao?.Any(e => e.recurso == recurso && e.dia == data)).GetValueOrDefault();
         }
-        [HttpPost(Name = "ComposicaoArquivo")]
-        public IActionResult Post(IFormFile file)
+        [HttpPost("Arquivo")]
+        [ActionName("PostArquivo")]
+        public IActionResult PostComposicao(IFormFile file)
         {
             if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
             var filemanager = new FileManager(_context, file);
