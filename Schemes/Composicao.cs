@@ -42,3 +42,17 @@ public class Composicao
     this.validacao = new();
   }
 }
+public enum Atividade {
+  NENHUM = 0,
+  CORTE = 1,
+  RELIGA = 2,
+  AVANCADO = 3,
+  CAMINHAO = 4,
+  EMERGENCIA = 5
+}
+public enum Regional
+{
+  NENHUM = 0,
+  BAIXADA = 1,
+  OESTE = 2
+}
