@@ -42,6 +42,11 @@ public class FileManager
     }
     writer.Flush();
     memory.Position = 0;
+    using (var fileStream = new FileStream($"./AppData/relatorios_ofs/{file.FileName}", FileMode.Create, FileAccess.Write))
+    {
+      memory.CopyTo(fileStream);
+    }
+    memory.Position = 0;
     return new StreamReader(memory);
   }
   public List<Servico> Relatorio()
