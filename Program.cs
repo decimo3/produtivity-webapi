@@ -1,23 +1,29 @@
 using backend.Services;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<Database>();
+builder.Services.AddScoped<AutenticacaoServico>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
 if(app.Environment.IsDevelopment())
 {
+    dotenv.net.DotEnv.Fluent().WithEnvFiles(".env").Load();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
 app.UseCors(option => {
   option
-    .AllowAnyOrigin()
+    .WithOrigins("localhost")
     .AllowAnyMethod()
-    .AllowAnyHeader();
+    .AllowAnyHeader()
+    .AllowCredentials();
 });
 app.UseAuthorization();
-app.MapControllers();
+app.UseMiddleware<AutenticacaoMiddleware>();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Estatistica}/{action=Index}/{id?}");
 app.Run();
