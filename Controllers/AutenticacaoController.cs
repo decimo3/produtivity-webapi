@@ -4,11 +4,11 @@ using backend.Services;
 using backend.Models;
 [ApiController]
 [Route("[controller]")]
-public class AutencicacaoController : ControllerBase
+public class AutenticacaoController : ControllerBase
 {
   private readonly AutenticacaoServico autenticacao;
   private readonly IHttpContextAccessor context;
-  public AutencicacaoController(AutenticacaoServico autenticacao, IHttpContextAccessor context)
+  public AutenticacaoController(AutenticacaoServico autenticacao, IHttpContextAccessor context)
   {
     this.autenticacao = autenticacao;
     this.context = context;
