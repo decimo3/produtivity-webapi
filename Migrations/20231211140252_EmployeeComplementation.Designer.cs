@@ -11,8 +11,8 @@ using backend.Services;
 namespace backend.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20231207114530_AuthField")]
-    partial class AuthField
+    [Migration("20231211140252_EmployeeComplementation")]
+    partial class EmployeeComplementation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,7 +75,19 @@ namespace backend.Migrations
                     b.Property<int>("matricula")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateOnly>("admissao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("atividade")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("demissao")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("funcao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("id_superior")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("nome_colaborador")
@@ -85,6 +97,12 @@ namespace backend.Migrations
                     b.Property<string>("palavra")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("regional")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("situacao")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("matricula");
 
