@@ -10,6 +10,7 @@ var app = builder.Build();
 if(app.Environment.IsDevelopment())
 {
     dotenv.net.DotEnv.Fluent().WithEnvFiles(".env").Load();
+    Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
     app.UseSwagger();
     app.UseSwaggerUI();
 }
