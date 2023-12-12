@@ -29,4 +29,12 @@ public class AutenticacaoController : ControllerBase
     context.HttpContext.Response.Cookies.Append("MeuCookie", auth.token, options);
     return Ok(auth);
   }
+  [HttpGet]
+  [AutenticacaoAtributo]
+  public ActionResult Get()
+  {
+    var auth = context.HttpContext.Items["User"];
+    if (auth is null) throw new InvalidOperationException("The employee was not defined in the context of the request!");
+    return Ok(auth);
+  }
 }
