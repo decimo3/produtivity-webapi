@@ -13,6 +13,7 @@ public class Funcionario
   public string nome_colaborador { get; set; }
   [JsonIgnore]
   public String palavra { get; set; }
+  [JsonIgnore]
   public DateOnly admissao { get; set; }
   [JsonIgnore]
   public DateOnly demissao { get; set; }
