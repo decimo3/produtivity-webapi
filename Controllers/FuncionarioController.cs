@@ -31,7 +31,44 @@ namespace backend.Controllers
           }
             return await _context.funcionario.ToListAsync();
         }
-
+        [HttpPost("Verificar")]
+        [ActionName("PostVerificar")]
+        public ActionResult PostFuncionario(AutenticacaoVerificacao verificacao)
+        {
+          try
+          {
+            var auth = _context.funcionario.Where( x =>
+              x.matricula == verificacao.matricula &&
+              x.admissao == verificacao.admissao &&
+              x.nome_colaborador.ToLower() == verificacao.nome_colaborador.ToLower() ).FirstOrDefault();
+            if(auth is null) return NotFound();
+            var character = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var characters = new char[32];
+            var random = new Random();
+            for (int i = 0; i < characters.Length; i++) {
+              characters[i] = character[random.Next(character.Length)];
+            }
+            auth.palavra = new String(characters);
+            _context.Entry(auth).State = EntityState.Modified;
+            try
+            {
+              _context.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException erro)
+            {
+              Problem(erro.InnerException?.Message);
+            }
+            return Ok(new { auth.palavra });
+          }
+          catch (DbUpdateConcurrencyException erro)
+          {
+            return BadRequest(erro.InnerException?.Message);
+          }
+          catch (Exception ex)
+          {
+            return Problem(ex.Message);
+          }
+        }
         // GET: api/Funcionario/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Funcionario>> GetFuncionario(int id)
