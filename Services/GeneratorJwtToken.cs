@@ -2,8 +2,27 @@ namespace backend.Services;
 using backend.Models;
 public class JwtTokenGenerator
 {
-
-  public static string GenerateJwtToken(Funcionario funcionario)
+  public static String GenerateJwtToken(Funcionario funcionario)
+    {
+      var segredo = System.Environment.GetEnvironmentVariable("SECRET_KEY");
+      if (segredo is null) throw new InvalidOperationException("Environment variable SECRET_KEY is not set!");
+      var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+      var key = System.Text.Encoding.ASCII.GetBytes(segredo);
+      var symmetricKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key);
+      var claimRe = new System.Security.Claims.Claim("re", funcionario.matricula.ToString());
+      var claimFn = new System.Security.Claims.Claim("funcao", funcionario.funcao.ToString());
+      var claimNm = new System.Security.Claims.Claim("sub", funcionario.nome_colaborador);
+      var claims = new[] { claimRe, claimFn, claimNm };
+      var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+      {
+        Subject = new System.Security.Claims.ClaimsIdentity(claims),
+        Expires = DateTime.UtcNow.AddDays(7),
+        SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(symmetricKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+      };
+      var token = tokenHandler.CreateToken(tokenDescriptor);
+      return tokenHandler.WriteToken(token);
+    }
+  public static string generateJwtToken(Funcionario funcionario)
   {
     var segredo = System.Environment.GetEnvironmentVariable("SECRET_KEY");
     if (segredo is null) throw new InvalidOperationException("Environment variable SECRET_KEY is not set!");
@@ -11,7 +30,8 @@ public class JwtTokenGenerator
     var headerBase64 = EncodeBase64Url(JsonSerialize(header));
     var payload = new
     {
-      sub = funcionario.matricula,
+      re = funcionario.matricula,
+      sub = funcionario.nome_colaborador,
       role = funcionario.funcao,
       iat = UnixTimestamp(DateTime.Now),
       exp = UnixTimestamp(DateTime.Now.AddDays(7))
