@@ -22,23 +22,25 @@ public class AutenticacaoMiddleware
     try
     {
       var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-      var key = System.Text.Encoding.ASCII.GetBytes(segredo);
-      tokenHandler.ValidateToken(token, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+      var key = System.Text.Encoding.UTF8.GetBytes(segredo);
+      var issuerSiginingKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key);
+      var tokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
         {
           ValidateIssuerSigningKey = true,
-          IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+          IssuerSigningKey = issuerSiginingKey,
           ValidateIssuer = false,
           ValidateAudience = false,
-          // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
           ClockSkew = TimeSpan.Zero
-        }, out Microsoft.IdentityModel.Tokens.SecurityToken validatedToken);
+        };
+      tokenHandler.ValidateToken(token, tokenValidationParameters, out Microsoft.IdentityModel.Tokens.SecurityToken validatedToken);
         var jwtToken = (System.IdentityModel.Tokens.Jwt.JwtSecurityToken)validatedToken;
         var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "re").Value);
         // attach user to context on successful jwt validation
         context.Items["User"] = autenticacaoServico.GetById(userId);
     }
-    catch
+    catch (Exception ex)
     {
+        System.Console.WriteLine(ex);
         // do nothing if jwt validation fails
         // user is not attached to context so request won't have access to secure routes
     }
