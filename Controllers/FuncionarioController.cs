@@ -199,5 +199,31 @@ namespace backend.Controllers
         {
             return (_context.funcionario?.Any(e => e.matricula == id)).GetValueOrDefault();
         }
+        [HttpPut("TrocarSenha/{id}")]
+        [ActionName("PutTrocarSenha")]
+        public ActionResult PutFuncionario(Int32 id, AutenticacaoTrocarSenha alterar)
+        {
+          var funcionario = _context.funcionario.Find(id);
+          if(funcionario is null) return NotFound();
+          if(funcionario.palavra != alterar.atual) return Unauthorized();
+          if(alterar.nova != alterar.confirmacao) return BadRequest();
+          var padrao = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$";
+          var re = new System.Text.RegularExpressions.Regex(padrao);
+          if(!re.IsMatch(alterar.nova)) return BadRequest();
+          funcionario.palavra = alterar.nova;
+          try
+          {
+            _context.SaveChanges();
+            return NoContent();
+          }
+          catch (DbUpdateConcurrencyException erro)
+          {
+            return BadRequest(erro.InnerException?.Message);
+          }
+          catch (Exception ex)
+          {
+            return Problem(ex.Message);
+          }
+        }
     }
 }
