@@ -23,14 +23,6 @@ namespace backend.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "status",
-                table: "relatorio",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
-
             migrationBuilder.AlterColumn<long>(
                 name: "servico",
                 table: "relatorio",
@@ -232,14 +224,6 @@ namespace backend.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "status",
-                table: "relatorio",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
 
             migrationBuilder.AlterColumn<long>(
                 name: "servico",

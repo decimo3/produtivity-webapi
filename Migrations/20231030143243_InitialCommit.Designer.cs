@@ -113,9 +113,9 @@ namespace backend.Migrations
                     b.Property<long>("servico")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("status")
+                    b.Property<int>("status")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("tipo_atividade")
                         .HasColumnType("TEXT");

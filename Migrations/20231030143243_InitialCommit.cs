@@ -41,7 +41,7 @@ namespace backend.Migrations
                     indentificador = table.Column<int>(type: "INTEGER", nullable: false),
                     recurso = table.Column<string>(type: "TEXT", nullable: false),
                     dia = table.Column<DateOnly>(type: "TEXT", nullable: false),
-                    status = table.Column<string>(type: "TEXT", nullable: false),
+                    status = table.Column<int>(type: "INTEGER", nullable: false),
                     hora_inicio = table.Column<TimeOnly>(type: "TEXT", nullable: true),
                     hora_final = table.Column<TimeOnly>(type: "TEXT", nullable: true),
                     duracao_feito = table.Column<TimeOnly>(type: "TEXT", nullable: true),
