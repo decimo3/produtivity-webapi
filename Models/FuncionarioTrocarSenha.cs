@@ -1,10 +1,10 @@
 namespace backend.Models;
-public class AutenticacaoTrocarSenha
+public class FuncionarioTrocarSenha
 {
   public String? atual { get; set; }
   public String nova { get; set; }
   public String confirmacao { get; set; }
-  public AutenticacaoTrocarSenha(String? atual, String nova, String confirmacao)
+  public FuncionarioTrocarSenha(String? atual, String nova, String confirmacao)
   {
     this.atual = atual;
     this.nova = nova;
