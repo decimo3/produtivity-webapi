@@ -182,29 +182,31 @@ namespace backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFuncionario(int id)
         {
-            if (_context.funcionario == null)
-            {
-                return NotFound();
-            }
-            var funcionario = await _context.funcionario.FindAsync(id);
-            if (funcionario == null)
-            {
-                return NotFound();
-            }
-
-            _context.funcionario.Remove(funcionario);
+          if (_context.funcionario == null) return NotFound();
+          var funcionario = await _context.funcionario.FindAsync(id);
+          if (funcionario == null) return NotFound();
+          funcionario.situacao = SituacaoFuncionario.DESLIGADO;
+          try
+          {
             await _context.SaveChangesAsync();
-
             return NoContent();
+          }
+          catch (DbUpdateConcurrencyException erro)
+          {
+            return BadRequest(erro.InnerException?.Message);
+          }
+          catch (Exception ex)
+          {
+            return Problem(ex.Message);
+          }
         }
-
         private bool FuncionarioExists(int id)
         {
             return (_context.funcionario?.Any(e => e.matricula == id)).GetValueOrDefault();
         }
         [HttpPut("TrocarSenha/{id}")]
         [ActionName("PutTrocarSenha")]
-        public ActionResult PutFuncionario(Int32 id, AutenticacaoTrocarSenha alterar)
+        public ActionResult PutFuncionario(Int32 id, FuncionarioTrocarSenha alterar)
         {
           var funcionario = _context.funcionario.Find(id);
           if(funcionario is null) return NotFound();
