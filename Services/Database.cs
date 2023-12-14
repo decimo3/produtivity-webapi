@@ -14,22 +14,29 @@ public class Database : DbContext
     }
     else
     {
-      var server = System.Environment.GetEnvironmentVariable("MYSQL_HOST");
-      if(server is null) throw new InvalidOperationException("Environment variable MYSQL_HOST is not set!");
-      var dbuser = System.Environment.GetEnvironmentVariable("MYSQL_USER");
-      if(dbuser is null) throw new InvalidOperationException("Environment variable MYSQL_USER is not set!");
-      var dbpass = System.Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
-      if(dbpass is null) throw new InvalidOperationException("Environment variable MYSQL_PASSWORD is not set!");
-      var dbbase = System.Environment.GetEnvironmentVariable("MYSQL_DATABASE");
-      if(dbbase is null) throw new InvalidOperationException("Environment variable MYSQL_DATABASE is not set!");
-      var stringconnection = $"server={server};user={dbuser};password={dbpass};database={dbbase}";
-      var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
-      optionsBuilder.UseMySql(stringconnection, serverVersion);
+      var dbhost = System.Environment.GetEnvironmentVariable("PGHOST");
+      if(dbhost is null) throw new InvalidOperationException("Environment variable PGHOST is not set!");
+      var dbport = System.Environment.GetEnvironmentVariable("PGPORT");
+      if(dbport is null) throw new InvalidOperationException("Environment variable PGPORT is not set!");
+      var dbuser = System.Environment.GetEnvironmentVariable("PGUSER");
+      if(dbuser is null) throw new InvalidOperationException("Environment variable PGUSER is not set!");
+      var dbpass = System.Environment.GetEnvironmentVariable("PGPASSWORD");
+      if(dbpass is null) throw new InvalidOperationException("Environment variable PGPASSWORD is not set!");
+      var dbbase = System.Environment.GetEnvironmentVariable("PGDATABASE");
+      if(dbbase is null) throw new InvalidOperationException("Environment variable PGDATABASE is not set!");
+      var stringconnection = new Npgsql.NpgsqlConnectionStringBuilder()
+      {
+        Host = dbhost,
+        Port = Int32.Parse(dbport),
+        Username = dbuser,
+        Password = dbpass,
+        Database = dbbase
+      };
+      optionsBuilder.UseNpgsql(stringconnection.ConnectionString);
     }
   }
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    // TODO: Implement database modeling
     modelBuilder.Entity<Composicao>().HasKey(o => new {o.dia, o.recurso});
   }
   public DbSet<Composicao> composicao { get; set; }
