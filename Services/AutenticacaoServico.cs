@@ -22,8 +22,8 @@ public class AutenticacaoServico
             return null;
         }
     }
-  public Funcionario GetById(Int32 mat)
+  public Funcionario? GetById(Int32 mat)
   {
-    return database.funcionario.Where(f => f.matricula == mat).Single();
+    return database.funcionario.Where(f => f.matricula == mat).FirstOrDefault();
   }
 }
