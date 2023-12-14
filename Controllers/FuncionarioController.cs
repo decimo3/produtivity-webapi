@@ -149,30 +149,33 @@ namespace backend.Controllers
         // POST: api/Funcionario
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Funcionario>> PostFuncionario(Funcionario funcionario)
+        public async Task<ActionResult<Funcionario>> PostFuncionario(FuncionarioCreate f)
         {
-          if (_context.funcionario == null)
-          {
-              return Problem("Entity set 'Database.funcionario'  is null.");
-          }
+            if (_context.funcionario == null) return Problem("Entity set 'Database.funcionario'  is null.");
+            if (FuncionarioExists(f.matricula)) return Conflict();
+            var funcionario = new Funcionario()
+            {
+              matricula = f.matricula,
+              nome_colaborador = f.nome_colaborador,
+              admissao = f.admissao,
+              funcao = f.funcao,
+              regional = f.regional,
+              atividade = f.atividade
+            };
             _context.funcionario.Add(funcionario);
             try
             {
                 await _context.SaveChangesAsync();
+                return CreatedAtAction("GetFuncionario", new { id = funcionario.matricula }, funcionario);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateConcurrencyException erro)
             {
-                if (FuncionarioExists(funcionario.matricula))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+              return BadRequest(erro.InnerException?.Message);
             }
-
-            return CreatedAtAction("GetFuncionario", new { id = funcionario.matricula }, funcionario);
+            catch (Exception ex)
+            {
+              return Problem(ex.Message);
+            }
         }
 
         // DELETE: api/Funcionario/5
