@@ -22,36 +22,31 @@ namespace backend.Migrations
                 name: "atividade",
                 table: "funcionario",
                 type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<DateOnly>(
                 name: "demissao",
                 table: "funcionario",
                 type: "TEXT",
-                nullable: false,
-                defaultValue: new DateOnly(1, 1, 1));
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "id_superior",
                 table: "funcionario",
                 type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "palavra",
                 table: "funcionario",
                 type: "TEXT",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "regional",
                 table: "funcionario",
                 type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "situacao",

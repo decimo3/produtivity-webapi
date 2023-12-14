@@ -75,16 +75,16 @@ namespace backend.Migrations
                     b.Property<DateOnly>("admissao")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("atividade")
+                    b.Property<int?>("atividade")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateOnly>("demissao")
+                    b.Property<DateOnly?>("demissao")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("funcao")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("id_superior")
+                    b.Property<int?>("id_superior")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("nome_colaborador")
@@ -92,10 +92,9 @@ namespace backend.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("palavra")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("regional")
+                    b.Property<int?>("regional")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("situacao")
