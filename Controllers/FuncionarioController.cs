@@ -33,7 +33,7 @@ namespace backend.Controllers
         }
         [HttpPost("Verificar")]
         [ActionName("PostVerificar")]
-        public ActionResult PostFuncionario(AutenticacaoVerificacao verificacao)
+        public ActionResult PostFuncionario(FuncionarioVerificacao verificacao)
         {
           try
           {
