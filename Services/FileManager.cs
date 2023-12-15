@@ -88,7 +88,7 @@ public class FileManager
           var dia = Int32.Parse(ma.Groups["dia"].Value);
           var hor = Int32.Parse(ma.Groups["hor"].Value);
           var min = Int32.Parse(ma.Groups["min"].Value);
-          vencimento = new DateTime(year: ano, month: mes, day: dia, hour: hor, minute: min, second: 0);
+          vencimento = new DateTime(year: ano, month: mes, day: dia, hour: hor, minute: min, second: 0, kind: DateTimeKind.Utc);
         }
         servicos.Add(new Servico {
           filename = file.FileName,
