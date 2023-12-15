@@ -194,7 +194,9 @@ public class FileManager
           composicao.atividade = Enum.Parse<Atividade>(temp
             .Replace("RELIGA POSTO", "AVANCADO")
             .Replace("RELIGA CAMINHÃO", "CAMINHAO")
-            .Replace("EMERGÊNCIA", "EMERGENCIA"));
+            .Replace("EMERGÊNCIA", "EMERGENCIA")
+            .Replace("CORTE EXTRA", "EXTRACORTE")
+            .Replace("ESTOQUE DE CORTADOS", "ESTOQUE"));
         else composicao.validacao.Add(test);
 
         var func = new Funcionario();
@@ -310,7 +312,7 @@ public class FileManager
         if(arg.Length < 5) return "O texto está incompleto ou vazio!";
       break;
       case ExpectedType.Enum:
-        String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA"};
+        String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA", "ESTOQUE DE CORTADOS", "CORTE EXTRA"};
         if(!enums.Contains(arg)) return "O texto encontrado não corresponde com o padrão!";
       break;
       case ExpectedType.Placa:
