@@ -6,6 +6,7 @@ public class Servico
 {
   public String filename { get; set; }
   public String recurso { get; set; }
+  [DataType(DataType.Date)]
   public DateOnly dia { get; set; }
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -15,10 +16,15 @@ public class Servico
   public String? endereco_destino { get; set; }
   public String? cidade_destino { get; set; }
   public String? codigo_postal { get; set; }
+  [DataType(DataType.Time)]
   public TimeOnly? hora_inicio { get; set; }
+  [DataType(DataType.Time)]
   public TimeOnly? hora_final { get; set; }
+  [DataType(DataType.DateTime)]
   public DateTime? vencimento { get; set; }
+  [DataType(DataType.Duration)]
   public TimeSpan? duracao_feito { get; set; }
+  [DataType(DataType.Duration)]
   public TimeSpan? desloca_feito { get; set; }
   public String? tipo_atividade { get; set; }
   public Int64? servico { get; set; }
@@ -36,7 +42,9 @@ public class Servico
   public String? tipo_servico { get; set; }
   public Double? debitos_cliente { get; set; }
   public TipoInstalacao? tipo_instalacao { get; set; }
-  public TimeSpan? Desloca_estima { get; set; }
+  [DataType(DataType.Duration)]
+  public TimeSpan? desloca_estima { get; set; }
+  [DataType(DataType.Duration)]
   public TimeSpan? duracao_estima { get; set; }
   public String? motivo_indisponibilidade { get; set; }
 }

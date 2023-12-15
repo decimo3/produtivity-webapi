@@ -3,31 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace backend.Models;
 public class Composicao
 {
-  [Required]
+  [DataType(DataType.Date)]
   public DateOnly dia { get; set; }
-  [Required]
-  public int adesivo { get; set; }
-  [Required]
-  public string? placa { get; set; }
-  [Required]
+  public int? adesivo { get; set; } = 0;
+  public string? placa { get; set; } = "";
   public string recurso { get; set; }
-  [Required]
   public Atividade atividade { get; set; }
-  [Required]
   public string? motorista { get; set; }
-  [Required]
   public int id_motorista { get; set; }
-  [Required]
   public string? ajudante { get; set; }
-  [Required]
   public int id_ajudante { get; set; }
-  [Required]
-  public Int64 telefone { get; set; }
-  [Required]
+  public Int64 telefone { get; set; } = 0;
   public int id_supervisor { get; set; }
-  [Required]
   public string? supervisor { get; set; }
-  [Required]
   public Regional regional { get; set; }
   [NotMapped]
   public List<string> validacao { get; set; }

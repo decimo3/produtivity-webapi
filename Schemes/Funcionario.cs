@@ -7,7 +7,6 @@ public class Funcionario
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.None)]
   public Int32 matricula { get; set; }
-  [Required]
   public String nome_colaborador { get; set; }
   [JsonIgnore]
   public String? palavra { get; set; }
