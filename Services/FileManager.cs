@@ -81,8 +81,8 @@ public class FileManager
         var codigos = (values[44] != String.Empty) ? values[44] : values[59].Split(' ')[0];
         DateTime? vencimento = null;
         var re = new Regex(@"(?<dia>\d{2})/(?<mes>\d{2})/(?<ano>\d{2}) (?<hor>\d{2}):(?<min>\d{2})");
-        if(re.IsMatch(values[15])) {
-          var ma = re.Match(values[15]);
+        if(re.IsMatch(values[16])) {
+          var ma = re.Match(values[16]);
           var ano = Int32.Parse(ma.Groups["ano"].Value) + 2_000;
           var mes = Int32.Parse(ma.Groups["mes"].Value);
           var dia = Int32.Parse(ma.Groups["dia"].Value);
@@ -107,8 +107,8 @@ public class FileManager
           hora_inicio = TimeOnly.TryParse(values[12], out TimeOnly inicio) ? inicio : null,
           hora_final = TimeOnly.TryParse(values[13], out TimeOnly final) ? final : null,
           // values[14] = "inicio-fim" é desnecessário
-          vencimento = vencimento, // values[15] foi préviamente verificado e assinalado a variavel
-          // values[16] = "inicio SLA" é sempre o mesmo
+          // values[15] = "inicio SLA" é sempre o mesmo
+          vencimento = vencimento, // values[16] foi préviamente verificado e assinalado a variavel
           duracao_feito = TimeSpan.TryParse(values[17], out TimeSpan duracao) ? duracao : null,
           desloca_feito = TimeSpan.TryParse(values[18], out TimeSpan desloca) ? desloca : null,
           // values[19] = "tipo atividade" é sempre o mesmo
