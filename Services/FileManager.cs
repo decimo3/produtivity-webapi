@@ -135,7 +135,7 @@ public class FileManager
           debitos_cliente = Double.TryParse(values[62], out Double deb) ? deb : null,
           // values[63..68] = "multiplos" é desnecessário
           tipo_instalacao = fases,
-          Desloca_estima = TimeSpan.TryParse("00:" + values[69], out TimeSpan desloca_est) ? desloca_est : null,
+          desloca_estima = TimeSpan.TryParse("00:" + values[69], out TimeSpan desloca_est) ? desloca_est : null,
           duracao_estima = TimeSpan.TryParse("00:" + values[70], out TimeSpan duracao_est) ? duracao_est : null,
           // values[71..75] = "multiplos" é desnecessário
         });
