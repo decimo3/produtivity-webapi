@@ -31,7 +31,8 @@ public enum Atividade {
   RELIGA = 2,
   AVANCADO = 3,
   CAMINHAO = 4,
-  EMERGENCIA = 5
+  EMERGENCIA = 5,
+  ESTOQUE = 6
 }
 public enum Regional
 {
