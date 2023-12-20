@@ -6,6 +6,9 @@ builder.Services.AddScoped<AutenticacaoServico>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddLogging(builder =>
+  builder.AddProvider(new LoggerDatabaseProvider())
+);
 var app = builder.Build();
 if(app.Environment.IsDevelopment())
 {
