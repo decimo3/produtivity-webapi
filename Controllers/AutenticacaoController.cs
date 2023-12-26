@@ -23,8 +23,7 @@ public class AutenticacaoController : ControllerBase
       Expires = DateTime.Now.AddDays(7),
       Secure = false, // define a cookie como seguro, somente será enviado em conexões HTTPS.
       HttpOnly = false, // define a cookie como acessível somente por HTTP, não pode ser acessado por JavaScript.
-      Path = "/",
-      Domain = "localhost"
+      Path = "/"
     };
     context.HttpContext.Response.Cookies.Append("MeuCookie", auth.token, options);
     return Ok(auth);
