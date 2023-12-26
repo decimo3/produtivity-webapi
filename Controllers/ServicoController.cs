@@ -25,11 +25,25 @@ namespace backend.Controllers
             if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
             var filemanager = new FileManager(_context, file);
             var relatorio = filemanager.Relatorio();
+            var adicionado = 0;
+            var atualizado = 0;
             try
             {
-              _context.AddRange(relatorio);
+              foreach (var servico in relatorio)
+              {
+                  if(_context.relatorio.Any(s => s.indentificador == servico.indentificador))
+                  {
+                      _context.relatorio.Entry(servico).State = EntityState.Modified;
+                      atualizado += 1;
+                  }
+                  else
+                  {
+                      _context.Add(servico);
+                      adicionado += 1;
+                  }
+              }
               _context.SaveChanges();
-              return CreatedAtAction("GetServico", null, relatorio);
+              return CreatedAtAction("GetServico", null, new {adicionado, atualizado});
             }
             catch (System.InvalidOperationException erro)
             {
