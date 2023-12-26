@@ -195,7 +195,7 @@ public class FileManager
             .Replace("RELIGA POSTO", "AVANCADO")
             .Replace("RELIGA CAMINHÃO", "CAMINHAO")
             .Replace("EMERGÊNCIA", "EMERGENCIA")
-            .Replace("CORTE EXTRA", "EXTRACORTE")
+            .Replace("CORTE EXTRA", "CORTE")
             .Replace("ESTOQUE DE CORTADOS", "ESTOQUE"));
         else composicao.validacao.Add(test);
 
