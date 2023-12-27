@@ -47,4 +47,5 @@ public class Database : DbContext
   public DbSet<Valoracao> valoracao { get; set; }
   public DbSet<Objetivos> objetivo { get; set; }
   public DbSet<Contrato> contrato { get; set; }
+  public DbSet<Feriado> feriado { get; set; }
 }
