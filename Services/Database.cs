@@ -38,8 +38,13 @@ public class Database : DbContext
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     modelBuilder.Entity<Composicao>().HasKey(o => new {o.dia, o.recurso});
+    modelBuilder.Entity<Objetivos>().HasKey(o => new {o.regional, o.tipo_viatura, o.atividade});
+    modelBuilder.Entity<Valoracao>().HasKey(o => new {o.regional, o.tipo_viatura, o.atividade, o.codigo});
   }
   public DbSet<Composicao> composicao { get; set; }
   public DbSet<Servico> relatorio { get; set; }
   public DbSet<Funcionario> funcionario { get; set; }
+  public DbSet<Valoracao> valoracao { get; set; }
+  public DbSet<Objetivos> objetivo { get; set; }
+  public DbSet<Contrato> contrato { get; set; }
 }
