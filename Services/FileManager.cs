@@ -199,6 +199,8 @@ public class FileManager
             .Replace("ESTOQUE DE CORTADOS", "ESTOQUE"));
         else composicao.validacao.Add(test);
 
+        composicao.tipo_viatura = (composicao.atividade == Atividade.CAMINHAO) ? TipoViatura.PESADO : TipoViatura.LEVE;
+
         var func = new Funcionario();
 
         temp = worksheet.GetValue<string>(row, 6);

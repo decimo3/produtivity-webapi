@@ -17,6 +17,7 @@ public class Composicao
   public int id_supervisor { get; set; }
   public string? supervisor { get; set; }
   public Regional regional { get; set; }
+  public TipoViatura tipo_viatura { get; set; }
   [NotMapped]
   public List<string> validacao { get; set; }
   public Composicao()
@@ -39,4 +40,9 @@ public enum Regional
   NENHUM = 0,
   BAIXADA = 1,
   OESTE = 2
+}
+public enum TipoViatura
+{
+  LEVE = 0,
+  PESADO = 1
 }
