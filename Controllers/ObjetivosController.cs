@@ -42,36 +42,6 @@ public class ObjetivosController : ControllerBase
         if (_context.objetivo == null) return NotFound();
         return await _context.objetivo.ToListAsync();
     }
-    [HttpGet("{regional}/{viatura}/{atividade}")]
-    public async Task<ActionResult<Objetivos>> GetObjetivos(Regional regional, TipoViatura viatura, Atividade atividade)
-    {
-        if (_context.objetivo == null) return NotFound();
-        var objetivos = await _context.objetivo.FindAsync(regional, viatura, atividade);
-        if (objetivos == null) return NotFound();
-        return objetivos;
-    }
-    [HttpPut("{regional}/{viatura}/{atividade}")]
-    public async Task<IActionResult> PutObjetivos(Regional regional, TipoViatura viatura, Atividade atividade, Objetivos objetivos)
-    {
-        if (regional != objetivos.regional) return BadRequest();
-        if (viatura != objetivos.tipo_viatura) return BadRequest();
-        if (atividade != objetivos.atividade) return BadRequest();
-        if (!ObjetivosExists(regional, viatura, atividade)) return NotFound();
-        _context.Entry(objetivos).State = EntityState.Modified;
-        try
-        {
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-        catch (DbUpdateConcurrencyException erro)
-        {
-            return Problem(erro.InnerException!.Message);
-        }
-        catch (Exception erro)
-        {
-            return Problem(erro.Message);
-        }
-    }
     [HttpDelete("{regional}/{viatura}/{atividade}")]
     public async Task<IActionResult> DeleteObjetivos(Regional regional, TipoViatura viatura, Atividade atividade)
     {
