@@ -43,6 +43,7 @@ public enum Regional
 }
 public enum TipoViatura
 {
-  LEVE = 0,
-  PESADO = 1
+  NENHUM = 0,
+  LEVE = 1,
+  PESADO = 2
 }
