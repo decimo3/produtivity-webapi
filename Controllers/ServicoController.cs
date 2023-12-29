@@ -43,6 +43,7 @@ namespace backend.Controllers
                   }
               }
               _context.SaveChanges();
+              SetServico(file.FileName);
               return CreatedAtAction("GetServico", null, new {adicionado, atualizado});
             }
             catch (System.InvalidOperationException erro)
@@ -58,11 +59,30 @@ namespace backend.Controllers
               return Problem(erro.Message);
             }
         }
-        [HttpGet]
-        public ActionResult GetServico()
+        private void SetServico(String filename)
         {
-          var relatorios = from f in _context.relatorio orderby f.dia descending group f by f.filename into g orderby g.Key descending select new {filename = g.Key, servicos = g.Count(x => x.servico > 0 && x.status != TipoStatus.cancelado), recursos = g.Count(x => x.tipo_atividade == "Início de turno"), dia = g.First().dia};
-          return Ok(relatorios);
+          var filtrado = _context.relatorio.Where(e => e.filename == filename);
+          var relatorios = from f in filtrado orderby f.dia descending group f by f.filename into g orderby g.Key descending select new {filename = g.Key, servicos = g.Count(x => x.servico > 0 && x.status != TipoStatus.cancelado), recursos = g.Count(x => x.tipo_atividade == "Início de turno"), dia = g.First().dia};
+          foreach (var relatorio in relatorios.ToList())
+          {
+            var stats = new RelatorioEstatisticas(relatorio.filename, relatorio.dia, relatorio.recursos, relatorio.servicos);
+            var rel = _context.relatorioEstatisticas.Find(relatorio.filename);
+            if(rel == null)
+            {
+              _context.relatorioEstatisticas.Add(stats);
+            }
+            else
+            {
+              _context.relatorioEstatisticas.Entry(stats).State = EntityState.Modified;
+            }
+          }
+          _context.SaveChanges();
+        }
+        [HttpGet]
+        public ActionResult<IEnumerable<RelatorioEstatisticas>> GetServico()
+        {
+          if (_context.relatorioEstatisticas == null) return NotFound();
+          return _context.relatorioEstatisticas.ToList();
         }
         [HttpDelete("{filename}")]
         public ActionResult DeleteServico(string filename)
@@ -72,6 +92,8 @@ namespace backend.Controllers
             var relatorio = _context.relatorio.Where(x => x.filename == filename);
             if(!relatorio.Any()) return NotFound();
             _context.relatorio.RemoveRange(relatorio);
+            var stats = _context.relatorioEstatisticas.Find(filename);
+            if (stats != null) _context.relatorioEstatisticas.Remove(stats);
             _context.SaveChanges();
             return NoContent();
           }
