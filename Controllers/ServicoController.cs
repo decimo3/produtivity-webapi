@@ -84,6 +84,23 @@ namespace backend.Controllers
           if (_context.relatorioEstatisticas == null) return NotFound();
           return _context.relatorioEstatisticas.ToList();
         }
+        [HttpGet("{filename}")]
+        public ActionResult DownloadServico(string filename)
+        {
+          try
+          {
+            var stream = System.IO.File.OpenRead(@$"./AppData/relatorios_ofs/{filename}");
+            return new FileStreamResult(stream, "application/octet-stream");
+          }
+          catch (FileNotFoundException erro)
+          {
+            return NotFound(erro.Message);
+          }
+          catch (Exception erro)
+          {
+            return Problem(erro.Message);
+          }
+        }
         [HttpDelete("{filename}")]
         public ActionResult DeleteServico(string filename)
         {
