@@ -185,7 +185,12 @@ public class FileManager
 
         temp = worksheet.GetValue<string>(row, 4);
         test = this.is_valid(temp, row, "Recurso", ExpectedType.Text);
-        if(test == null) composicao.recurso = temp.Trim();
+        var re = new System.Text.RegularExpressions.Regex("^([A-Z]{4,})(?: - [A-z]{3,})?( [-|–] Equipe )([0-9]{3})$");
+        if(test == null)
+        {
+          if(!re.IsMatch(temp.Trim())) composicao.validacao.Add("O recurso digitado é inválido!");
+          composicao.recurso = temp.Trim();
+        }
         else composicao.validacao.Add(test);
 
         temp = worksheet.GetValue<string>(row, 5);
