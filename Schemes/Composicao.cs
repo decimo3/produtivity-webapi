@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace backend.Models;
 public class Composicao
 {
+  public String identificador { get; set; }
   [DataType(DataType.Date)]
   public DateOnly dia { get; set; }
   public int? adesivo { get; set; } = 0;

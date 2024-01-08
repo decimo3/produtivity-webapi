@@ -294,6 +294,8 @@ public class FileManager
             .Replace("JACAREPAGUA", "OESTE"));
         else composicao.validacao.Add(test);
 
+        composicao.identificador = composicao.dia.ToString("YYYY-MM-DD") + composicao.recurso;
+
         composicoes.Add(composicao);
       }
     }
