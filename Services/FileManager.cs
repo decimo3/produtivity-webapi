@@ -294,8 +294,8 @@ public class FileManager
             .Replace("JACAREPAGUA", "OESTE"));
         else composicao.validacao.Add(test);
 
-        if(composicao.dia == DateOnly.MinValue && composicao.recurso != null)
-          composicao.identificador = composicao.dia.ToString("YYYY-MM-DD") + composicao.recurso;
+        if((composicao.dia != DateOnly.MinValue) && (composicao.recurso != null))
+          composicao.identificador = composicao.dia.ToString("yyyy-MM-dd") + composicao.recurso;
 
         composicoes.Add(composicao);
       }
