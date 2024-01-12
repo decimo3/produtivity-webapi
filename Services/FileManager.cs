@@ -38,6 +38,11 @@ public class FileManager
         writer.Write('.');
         continue;
       }
+      if (letra == '–' && insideField == true)
+      {
+        writer.Write('-');
+        continue;
+      }
       writer.Write(letra);
     }
     writer.Flush();
@@ -47,7 +52,7 @@ public class FileManager
       memory.CopyTo(fileStream);
     }
     memory.Position = 0;
-    return new StreamReader(memory);
+    return new StreamReader(memory, System.Text.Encoding.UTF8);
   }
   public List<Servico> Relatorio()
   {
@@ -90,11 +95,13 @@ public class FileManager
           var min = Int32.Parse(ma.Groups["min"].Value);
           vencimento = new DateTime(year: ano, month: mes, day: dia, hour: hor, minute: min, second: 0, kind: DateTimeKind.Utc);
         }
+        var abreviado = abreviacao(values[0]);
+        var id = (abreviado == String.Empty) ? String.Empty : String.Concat((Int32.Parse(DateTime.Parse(values[1]).ToOADate().ToString()), abreviado));
         servicos.Add(new Servico {
           filename = file.FileName,
           recurso = values[0],
           dia = DateOnly.Parse(values[1]),
-          indentificador = Int32.Parse(values[2]),
+          serial = Int32.Parse(values[2]),
           status = status, // values[3] foi préviamente verificado e assinalado a variavel
           nome_do_cliente = values[4],
           endereco_destino = values[5],
@@ -138,6 +145,7 @@ public class FileManager
           desloca_estima = TimeSpan.TryParse("00:" + values[69], out TimeSpan desloca_est) ? desloca_est : null,
           duracao_estima = TimeSpan.TryParse("00:" + values[70], out TimeSpan duracao_est) ? duracao_est : null,
           // values[71..75] = "multiplos" é desnecessário
+          identificador = id
         });
       }
     }
@@ -295,7 +303,10 @@ public class FileManager
         else composicao.validacao.Add(test);
 
         if((composicao.dia != DateOnly.MinValue) && (composicao.recurso != null))
-          composicao.identificador = composicao.dia.ToString("yyyy-MM-dd") + composicao.recurso;
+        {
+          composicao.abreviacao = abreviacao(composicao.recurso);
+          composicao.identificador = composicao.dia.ToDateTime(TimeOnly.MinValue).ToOADate() + composicao.abreviacao;
+        }
 
         composicoes.Add(composicao);
       }
@@ -341,4 +352,18 @@ public class FileManager
     return true;
   }
   private enum ExpectedType {Text, Number, Date, Time, Enum, Placa}
+  private String abreviacao(String recurso)
+  {
+    var re1 = new System.Text.RegularExpressions.Regex("^([A-Z]{3,})");
+    var re2 = new System.Text.RegularExpressions.Regex("([A-Z][a-z]{1,})");
+    var re3 = new System.Text.RegularExpressions.Regex("([0-9]{3})");
+    if(!re3.IsMatch(recurso)) return String.Empty;
+    var abreviado = "";
+    recurso = recurso.Replace('–', '-');
+    abreviado += re1.Match(recurso).Value;
+    if(re2.Match(recurso).Value == "Religa") abreviado += 'R';
+    if(re2.Match(recurso).Value == "Corte") abreviado += 'C';
+    abreviado += re3.Match(recurso).Value;
+    return abreviado;
+  }
 }
