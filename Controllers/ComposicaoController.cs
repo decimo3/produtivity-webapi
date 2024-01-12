@@ -143,6 +143,8 @@ namespace backend.Controllers
             try
             {
               var composicoes = filemanager.Composicao();
+              if (composicoes.GroupBy(a => a.dia).Any(b => b.Count() > 1))
+                throw new InvalidOperationException("A composição enviada contém mais de uma data!\nA composição deve ser enviada um dia por vez.");
               if (composicoes.Where(c => c.validacao.Any()).Any())
               {
                 return UnprocessableEntity(composicoes);
