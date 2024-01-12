@@ -30,6 +30,9 @@ namespace backend.Migrations
                     b.Property<string>("recurso")
                         .HasColumnType("text");
 
+                    b.Property<string>("abreviacao")
+                        .HasColumnType("text");
+
                     b.Property<int?>("adesivo")
                         .HasColumnType("integer");
 
@@ -71,6 +74,8 @@ namespace backend.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("dia", "recurso");
+
+                    b.HasIndex("identificador");
 
                     b.ToTable("composicao");
                 });
@@ -204,7 +209,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Servico", b =>
                 {
-                    b.Property<long>("indentificador")
+                    b.Property<long>("serial")
                         .HasColumnType("bigint");
 
                     b.Property<string>("area_trabalho")
@@ -268,6 +273,9 @@ namespace backend.Migrations
                     b.Property<string>("id_viatura")
                         .HasColumnType("text");
 
+                    b.Property<string>("identificador")
+                        .HasColumnType("text");
+
                     b.Property<int?>("instalacao")
                         .HasColumnType("integer");
 
@@ -305,7 +313,9 @@ namespace backend.Migrations
                     b.Property<DateTime?>("vencimento")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("indentificador");
+                    b.HasKey("serial");
+
+                    b.HasIndex("identificador");
 
                     b.ToTable("relatorio");
                 });

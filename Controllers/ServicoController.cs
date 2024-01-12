@@ -31,7 +31,7 @@ namespace backend.Controllers
             {
               foreach (var servico in relatorio)
               {
-                  if(_context.relatorio.Any(s => s.indentificador == servico.indentificador))
+                  if(_context.relatorio.Any(s => s.serial == servico.serial))
                   {
                       _context.relatorio.Entry(servico).State = EntityState.Modified;
                       atualizado += 1;

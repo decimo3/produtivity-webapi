@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace backend.Models;
+[Index(nameof(identificador), IsUnique = true)]
 public class Composicao
 {
   public String identificador { get; set; }
@@ -21,6 +23,7 @@ public class Composicao
   public TipoViatura tipo_viatura { get; set; }
   [NotMapped]
   public List<string> validacao { get; set; }
+  public String? abreviacao { get; set; }
   public Composicao()
   {
     this.recurso = "";

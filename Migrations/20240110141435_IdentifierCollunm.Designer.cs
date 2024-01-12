@@ -12,8 +12,8 @@ using backend.Services;
 namespace backend.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20240108192346_IndentificadorCollunm")]
-    partial class IndentificadorCollunm
+    [Migration("20240110141435_IdentifierCollunm")]
+    partial class IdentifierCollunm
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,9 @@ namespace backend.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("recurso")
+                        .HasColumnType("text");
+
+                    b.Property<string>("abreviacao")
                         .HasColumnType("text");
 
                     b.Property<int?>("adesivo")
@@ -74,6 +77,8 @@ namespace backend.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("dia", "recurso");
+
+                    b.HasIndex("identificador");
 
                     b.ToTable("composicao");
                 });
@@ -207,7 +212,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Servico", b =>
                 {
-                    b.Property<long>("indentificador")
+                    b.Property<long>("serial")
                         .HasColumnType("bigint");
 
                     b.Property<string>("area_trabalho")
@@ -271,6 +276,9 @@ namespace backend.Migrations
                     b.Property<string>("id_viatura")
                         .HasColumnType("text");
 
+                    b.Property<string>("identificador")
+                        .HasColumnType("text");
+
                     b.Property<int?>("instalacao")
                         .HasColumnType("integer");
 
@@ -308,7 +316,9 @@ namespace backend.Migrations
                     b.Property<DateTime?>("vencimento")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("indentificador");
+                    b.HasKey("serial");
+
+                    b.HasIndex("identificador");
 
                     b.ToTable("relatorio");
                 });
