@@ -96,7 +96,7 @@ public class FileManager
           vencimento = new DateTime(year: ano, month: mes, day: dia, hour: hor, minute: min, second: 0, kind: DateTimeKind.Utc);
         }
         var abreviado = abreviacao(values[0]);
-        var id = (abreviado == String.Empty) ? String.Empty : String.Concat((Int32.Parse(DateTime.Parse(values[1]).ToOADate().ToString()), abreviado));
+        var id = (abreviado == String.Empty) ? String.Empty : String.Concat(DateTime.Parse(values[1]).ToString("yyyyMMdd"), abreviado);
         servicos.Add(new Servico {
           filename = file.FileName,
           recurso = values[0],
@@ -145,7 +145,8 @@ public class FileManager
           desloca_estima = TimeSpan.TryParse("00:" + values[69], out TimeSpan desloca_est) ? desloca_est : null,
           duracao_estima = TimeSpan.TryParse("00:" + values[70], out TimeSpan duracao_est) ? duracao_est : null,
           // values[71..75] = "multiplos" é desnecessário
-          identificador = id
+          identificador = id,
+          abreviacao = abreviado
         });
       }
     }
@@ -305,7 +306,7 @@ public class FileManager
         if((composicao.dia != DateOnly.MinValue) && (composicao.recurso != null))
         {
           composicao.abreviacao = abreviacao(composicao.recurso);
-          composicao.identificador = composicao.dia.ToDateTime(TimeOnly.MinValue).ToOADate() + composicao.abreviacao;
+          composicao.identificador = composicao.dia.ToString("yyyyMMdd") + composicao.abreviacao;
         }
 
         composicoes.Add(composicao);
