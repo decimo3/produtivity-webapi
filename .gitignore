@@ -478,3 +478,4 @@ $RECYCLE.BIN/
 
 # Persistence files
 AppData
+.env
