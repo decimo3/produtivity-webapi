@@ -14,10 +14,16 @@ namespace backend.Controllers
     [ApiController]
     public class ComposicaoController : ControllerBase
     {
-        private readonly Database _context;
-        public ComposicaoController(Database context)
+        private readonly Database database;
+        private readonly IHttpContextAccessor httpContext;
+        private readonly AlteracoesServico alteracaoLog;
+        public ComposicaoController(Database database, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
         {
-            _context = context;
+            this.database = database;
+            this.httpContext = httpContext;
+            this.alteracaoLog = alteracaoLog;
+            this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
+            this.alteracaoLog.tabela = this.ToString()!;
         }
         // GET: api/Composicao
         [HttpGet("{inicio}/{final}/{regional}/{atividade}")]
