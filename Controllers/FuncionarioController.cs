@@ -15,20 +15,21 @@ namespace backend.Controllers
     public class FuncionarioController : ControllerBase
     {
         private readonly Database _context;
+        private readonly AlteracoesServico alteracaoLog;
 
-        public FuncionarioController(Database context)
+        public FuncionarioController(Database context, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
         {
             _context = context;
+            this.alteracaoLog = alteracaoLog;
+            this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
+            this.alteracaoLog.tabela = this.ToString()!;
         }
 
         // GET: api/Funcionario
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Funcionario>>> Getfuncionario()
         {
-          if (_context.funcionario == null)
-          {
-              return NotFound();
-          }
+          if (_context.funcionario == null) return NotFound();
             return await _context.funcionario.ToListAsync();
         }
         [HttpPost("Verificar")]
@@ -42,6 +43,7 @@ namespace backend.Controllers
               x.admissao == verificacao.admissao &&
               x.nome_colaborador.ToLower() == verificacao.nome_colaborador.ToLower() ).FirstOrDefault();
             if(auth is null) return NotFound();
+            var anterior = auth;
             var character = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             var characters = new char[32];
             var random = new Random();
@@ -53,12 +55,13 @@ namespace backend.Controllers
             try
             {
               _context.SaveChanges();
+              alteracaoLog.Registrar("PUT", anterior, auth);
             }
             catch (DbUpdateConcurrencyException erro)
             {
               Problem(erro.InnerException?.Message);
             }
-            return Ok(new { auth.palavra });
+            return Ok();
           }
           catch (DbUpdateConcurrencyException erro)
           {
@@ -86,68 +89,44 @@ namespace backend.Controllers
 
             return funcionario;
         }
-
-        // PUT: api/Funcionario/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFuncionario(int id, Funcionario funcionario)
         {
-          if (_context.funcionario == null)
-          {
-              return Problem("Entity set 'Database.funcionario'  is null.");
-          }
+            if (_context.funcionario == null) return Problem("Entity set 'Database.funcionario'  is null.");
+            if (!FuncionarioExists(id)) return NotFound();
             if (id != funcionario.matricula)
             {
-              if (!FuncionarioExists(id))
-              {
-                return NotFound();
-              }
-              if (FuncionarioExists(funcionario.matricula))
-              {
-                return Conflict();
-              }
-              _context.funcionario.Add(funcionario);
-              //
-              var f = await _context.funcionario.FindAsync(id);
-              if (f == null)
-              {
-                  return NotFound();
-              }
-              _context.funcionario.Remove(f);
-              try
-              {
-                await _context.SaveChangesAsync();
-              }
-              catch (DbUpdateConcurrencyException erro)
-              {
-                Problem(erro.InnerException?.Message);
-              }
-              return NoContent();
-            }
-
-            _context.Entry(funcionario).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FuncionarioExists(id))
+                if (FuncionarioExists(funcionario.matricula)) return Conflict();
+                var f = await _context.funcionario.FindAsync(id);
+                _context.funcionario.Add(funcionario);
+                _context.funcionario.Remove(f);
+                try
                 {
-                    return NotFound();
+                    await _context.SaveChangesAsync();
+                    alteracaoLog.Registrar("PUT", f, funcionario);
+                    return NoContent();
                 }
-                else
+                catch (DbUpdateConcurrencyException erro)
                 {
-                    throw;
+                    return Problem(erro.InnerException?.Message);
                 }
             }
-
-            return NoContent();
+            else
+            {
+                var func = await _context.funcionario.FindAsync(id);
+                _context.Entry(funcionario).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    alteracaoLog.Registrar("PUT", func, funcionario);
+                    return NoContent();
+                }
+                catch (DbUpdateConcurrencyException erro)
+                {
+                    return Problem(erro.InnerException?.Message);
+                }
+            }
         }
-
-        // POST: api/Funcionario
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Funcionario>> PostFuncionario(FuncionarioCreate f)
         {
@@ -166,6 +145,7 @@ namespace backend.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                alteracaoLog.Registrar("POST", null, funcionario);
                 return CreatedAtAction("GetFuncionario", new { id = funcionario.matricula }, funcionario);
             }
             catch (DbUpdateConcurrencyException erro)
@@ -177,18 +157,18 @@ namespace backend.Controllers
               return Problem(ex.Message);
             }
         }
-
-        // DELETE: api/Funcionario/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFuncionario(int id)
         {
           if (_context.funcionario == null) return NotFound();
           var funcionario = await _context.funcionario.FindAsync(id);
           if (funcionario == null) return NotFound();
+          var anterior = funcionario;
           funcionario.situacao = SituacaoFuncionario.DESLIGADO;
           try
           {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("DELETE", anterior, funcionario);
             return NoContent();
           }
           catch (DbUpdateConcurrencyException erro)
@@ -210,6 +190,7 @@ namespace backend.Controllers
         {
           var funcionario = _context.funcionario.Find(id);
           if(funcionario is null) return NotFound();
+          var anterior = funcionario;
           if(funcionario.palavra != alterar.atual) return Unauthorized();
           if(alterar.nova != alterar.confirmacao) return BadRequest();
           var padrao = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$";
@@ -219,6 +200,7 @@ namespace backend.Controllers
           try
           {
             _context.SaveChanges();
+            alteracaoLog.Registrar("PUT", anterior, funcionario);
             return NoContent();
           }
           catch (DbUpdateConcurrencyException erro)
