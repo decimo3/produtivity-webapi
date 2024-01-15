@@ -3,6 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<Database>();
 builder.Services.AddScoped<AutenticacaoServico>();
+builder.Services.AddScoped<AlteracoesServico>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
