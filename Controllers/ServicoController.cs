@@ -10,14 +10,18 @@ using backend.Services;
 
 namespace backend.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class ServicoController : ControllerBase
     {
         private readonly Database _context;
-        public ServicoController(Database context)
+        private readonly AlteracoesServico alteracaoLog;
+        public ServicoController(Database context, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
         {
             _context = context;
+            this.alteracaoLog = alteracaoLog;
+            this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
+            this.alteracaoLog.tabela = this.ToString()!;
         }
         [HttpPost]
         public ActionResult PostServico(IFormFile file)
@@ -44,7 +48,9 @@ namespace backend.Controllers
               }
               _context.SaveChanges();
               SetServico(file.FileName);
-              return CreatedAtAction("GetServico", null, new {adicionado, atualizado});
+              var stats = _context.relatorioEstatisticas.Find(file.FileName);
+              alteracaoLog.Registrar("POST", null, stats);
+              return CreatedAtAction("GetServico", null, stats);
             }
             catch (System.InvalidOperationException erro)
             {
@@ -112,6 +118,7 @@ namespace backend.Controllers
             var stats = _context.relatorioEstatisticas.Find(filename);
             if (stats != null) _context.relatorioEstatisticas.Remove(stats);
             _context.SaveChanges();
+            alteracaoLog.Registrar("DELETE", stats, null);
             return NoContent();
           }
           catch (Microsoft.EntityFrameworkCore.DbUpdateException erro)
