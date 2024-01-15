@@ -15,9 +15,13 @@ if(app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
+var HOST = System.Environment.GetEnvironmentVariable("COMPUTERNAME")
+  ?? throw new InvalidOperationException("Environment variable COMPUTERNAME is not set or is innacessible!");
+var PORT = System.Environment.GetEnvironmentVariable("WEB_PORT")
+  ?? throw new InvalidOperationException("Environment variable WEB_PORT is not set or is innacessible!");
 app.UseCors(option => {
   option
-    .WithOrigins("http://localhost:8080")
+    .WithOrigins($"http://{HOST}:{PORT}")
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials();
