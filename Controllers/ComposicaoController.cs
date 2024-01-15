@@ -15,12 +15,10 @@ namespace backend.Controllers
     public class ComposicaoController : ControllerBase
     {
         private readonly Database database;
-        private readonly IHttpContextAccessor httpContext;
         private readonly AlteracoesServico alteracaoLog;
         public ComposicaoController(Database database, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
         {
             this.database = database;
-            this.httpContext = httpContext;
             this.alteracaoLog = alteracaoLog;
             this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
             this.alteracaoLog.tabela = this.ToString()!;
@@ -121,7 +119,7 @@ namespace backend.Controllers
             if (composicao == null) return NotFound();
             database.composicao.Remove(composicao);
             database.SaveChanges();
-            alteracaoLog.Registrar("DEL", composicao, null);
+            alteracaoLog.Registrar("DELETE", composicao, null);
             return NoContent();
         }
 
