@@ -8,9 +8,13 @@ namespace backend.Controllers;
 public class ValoracaoController : ControllerBase
 {
     private readonly Database _context;
-    public ValoracaoController(Database context)
+    private readonly AlteracoesServico alteracaoLog;
+    public ValoracaoController(Database context, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
     {
         _context = context;
+        this.alteracaoLog = alteracaoLog;
+        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
+        this.alteracaoLog.tabela = this.ToString()!;
     }
     private bool ValoracaoExists(Regional regional, TipoViatura viatura, Atividade atividade, String codigo)
     {
@@ -25,6 +29,7 @@ public class ValoracaoController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("POST", null, valoracao);
             return CreatedAtAction("GetValoracao", new { regional = valoracao.regional, viatura = valoracao.tipo_viatura, atividade = valoracao.atividade, codigo = valoracao.codigo }, valoracao);
         }
         catch (DbUpdateConcurrencyException erro)
@@ -52,6 +57,7 @@ public class ValoracaoController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("DELETE", valoracao, null);
             return NoContent();
         }
         catch (DbUpdateConcurrencyException erro)

@@ -9,9 +9,13 @@ namespace backend.Controllers;
 public class ContratoController : ControllerBase
 {
     private readonly Database _context;
-    public ContratoController(Database context)
+    private readonly AlteracoesServico alteracaoLog;
+    public ContratoController(Database context, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
     {
         _context = context;
+        this.alteracaoLog = alteracaoLog;
+        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
+        this.alteracaoLog.tabela = this.ToString()!;
     }
     private bool ContratoExists(string id)
     {
@@ -32,6 +36,7 @@ public class ContratoController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("POST", null, contrato);
             return CreatedAtAction("GetContrato", new { id = contrato.contrato }, contrato);
         }
         catch (DbUpdateConcurrencyException erro)
@@ -53,6 +58,7 @@ public class ContratoController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("DELETE", null, contrato);
             return NoContent();
         }
         catch (DbUpdateConcurrencyException erro)

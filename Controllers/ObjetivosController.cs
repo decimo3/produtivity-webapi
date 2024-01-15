@@ -8,9 +8,13 @@ namespace backend.Controllers;
 public class ObjetivosController : ControllerBase
 {
     private readonly Database _context;
-    public ObjetivosController(Database context)
+    private readonly AlteracoesServico alteracaoLog;
+    public ObjetivosController(Database context, IHttpContextAccessor httpContext, AlteracoesServico alteracaoLog)
     {
         _context = context;
+        this.alteracaoLog = alteracaoLog;
+        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
+        this.alteracaoLog.tabela = this.ToString()!;
     }
     private bool ObjetivosExists(Regional regional, TipoViatura tipoviatura, Atividade atividade)
     {
@@ -25,6 +29,7 @@ public class ObjetivosController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("POST", null, objetivos);
             return CreatedAtAction("GetObjetivos", new { id = objetivos.regional }, objetivos);
         }
         catch (DbUpdateConcurrencyException erro)
@@ -52,6 +57,7 @@ public class ObjetivosController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
+            alteracaoLog.Registrar("DELETE", objetivos, null);
             return NoContent();
         }
         catch (DbUpdateConcurrencyException erro)
