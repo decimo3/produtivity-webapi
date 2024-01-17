@@ -25,5 +25,5 @@ ALTER TABLE relatorio RENAME COLUMN recurso_novo TO recurso;
 
 -- Recriar o índice excluído para agilizar as alterações na coluna;
 
-CREATE INDEX "IX_relatorio_identificador" ON public.relatorio USING btree (identificador);
+CREATE UNIQUE INDEX "IX_relatorio_identificador" ON public.relatorio USING btree ('serial');
 CREATE UNIQUE INDEX "IX_composicao_identificador" ON public.composicao USING btree (identificador);
