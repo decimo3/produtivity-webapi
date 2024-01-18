@@ -309,6 +309,16 @@ public class FileManager
           composicao.identificador = composicao.dia.ToString("yyyyMMdd") + composicao.abreviacao;
         }
 
+        var contrato = database.contrato
+          .Where(o =>
+            o.regional == composicao.regional &&
+            o.atividade == composicao.atividade &&
+            o.inicio_vigencia <= composicao.dia &&
+            o.final_vigencia >= composicao.dia)
+          .Single();
+        composicao.contrato = contrato.contrato;
+        composicao.revisao = contrato.revisao;
+
         composicoes.Add(composicao);
       }
     }

@@ -38,6 +38,15 @@ namespace backend.Controllers
         [HttpPut("{data}/{recurso}")]
         public ActionResult PutComposicao(DateOnly data, string recurso, Composicao composicao)
         {
+            var contrato = database.contrato
+              .Where(o =>
+                o.regional == composicao.regional &&
+                o.atividade == composicao.atividade &&
+                o.inicio_vigencia <= composicao.dia &&
+                o.final_vigencia >= composicao.dia)
+              .Single();
+            composicao.contrato = contrato.contrato;
+            composicao.revisao = contrato.revisao;
             if (!ComposicaoExists(data, recurso))
             {
                 return NotFound();
@@ -81,6 +90,15 @@ namespace backend.Controllers
         [ActionName("PostFormulario")]
         public ActionResult PostComposicao(Composicao composicao)
         {
+          var contrato = database.contrato
+            .Where(o =>
+              o.regional == composicao.regional &&
+              o.atividade == composicao.atividade &&
+              o.inicio_vigencia <= composicao.dia &&
+              o.final_vigencia >= composicao.dia)
+            .Single();
+          composicao.contrato = contrato.contrato;
+          composicao.revisao = contrato.revisao;
           if (database.composicao == null)
           {
               return Problem("Entity set 'Database.composicao'  is null.");
