@@ -24,6 +24,8 @@ public class Composicao
   [NotMapped]
   public List<string> validacao { get; set; }
   public String? abreviacao { get; set; }
+  public Int64? contrato { get; set; }
+  public Int16? revisao { get; set; }
   public Composicao()
   {
     this.recurso = "";
@@ -37,7 +39,8 @@ public enum Atividade {
   AVANCADO = 3,
   CAMINHAO = 4,
   EMERGENCIA = 5,
-  ESTOQUE = 6
+  ESTOQUE = 6,
+  INSPECAO = 7,
 }
 public enum Regional
 {

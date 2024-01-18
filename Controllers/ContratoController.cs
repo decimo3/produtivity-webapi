@@ -17,7 +17,7 @@ public class ContratoController : ControllerBase
         this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
         this.alteracaoLog.tabela = this.ToString()!;
     }
-    private bool ContratoExists(string id)
+    private bool ContratoExists(Int64 id)
     {
         return (_context.contrato?.Any(e => e.contrato == id)).GetValueOrDefault();
     }
@@ -49,7 +49,7 @@ public class ContratoController : ControllerBase
         }
     }
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteContrato(string id)
+    public async Task<IActionResult> DeleteContrato(Int64 id)
     {
         if (_context.contrato == null) return NotFound();
         var contrato = await _context.contrato.FindAsync(id);
