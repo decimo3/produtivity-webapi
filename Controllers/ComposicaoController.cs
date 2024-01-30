@@ -38,24 +38,18 @@ namespace backend.Controllers
         [HttpPut("{data}/{recurso}")]
         public ActionResult PutComposicao(DateOnly data, string recurso, Composicao composicao)
         {
-            if (!ComposicaoExists(data, recurso))
-            {
-                return NotFound();
-            }
-            var c = database.composicao.Find(data, recurso);
-            if (c == null) return NotFound();
+            if (!ComposicaoExists(data, recurso)) return NotFound();
             if (recurso != composicao.recurso)
             {
-                if (ComposicaoExists(composicao.dia, composicao.recurso))
-                {
-                    return Conflict();
-                }
-                database.composicao.Remove(c);
+                if (ComposicaoExists(composicao.dia, composicao.recurso)) return Conflict();
+                var composicao_atual = database.composicao.Find(data, recurso);
+                if (composicao_atual == null) return NotFound();
+                database.composicao.Remove(composicao_atual);
                 database.composicao.Add(composicao);
                 try
                 {
                   database.SaveChanges();
-                  alteracaoLog.Registrar("PUT", c, composicao);
+                  alteracaoLog.Registrar("PUT", composicao_atual, composicao);
                   return NoContent();
                 }
                 catch (DbUpdateConcurrencyException erro)
@@ -63,16 +57,21 @@ namespace backend.Controllers
                   return Problem(erro.InnerException?.Message);
                 }
             }
-            database.Entry(composicao).State = EntityState.Modified;
-            try
+            else
             {
-                database.SaveChanges();
-                alteracaoLog.Registrar("PUT", c, composicao);
-                return NoContent();
-            }
-            catch (DbUpdateConcurrencyException erro)
-            {
-                return Problem(erro.InnerException?.Message);
+                var composicao_atual = database.composicao.AsNoTracking()
+                    .Where(o => o.dia == data && o.recurso == recurso).Single();
+                database.Entry(composicao).State = EntityState.Modified;
+                try
+                {
+                    database.SaveChanges();
+                    alteracaoLog.Registrar("PUT", composicao_atual, composicao);
+                    return NoContent();
+                }
+                catch (DbUpdateConcurrencyException erro)
+                {
+                    return Problem(erro.InnerException?.Message);
+                }
             }
         }
         // POST: api/Composicao
