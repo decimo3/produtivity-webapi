@@ -15,9 +15,13 @@ if(app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHttpsRedirection();
+if(app.Environment.IsProduction())
+{
+  app.UseHttpsRedirection();
+}
 var HOST = System.Environment.GetEnvironmentVariable("COMPUTERNAME")
   ?? throw new InvalidOperationException("Environment variable COMPUTERNAME is not set or is innacessible!");
+HOST = HOST.ToLower();
 // var PORT = System.Environment.GetEnvironmentVariable("WEB_PORT")
 //   ?? throw new InvalidOperationException("Environment variable WEB_PORT is not set or is innacessible!");
 var allowedOrigins = new String[] {$"http://{HOST}:80", $"http://{HOST}:8080", $"https://{HOST}:7103", $"http://{HOST}:5131"};
