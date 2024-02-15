@@ -24,6 +24,11 @@ public class Composicao
   [NotMapped]
   public List<string> validacao { get; set; }
   public String? abreviacao { get; set; }
+  public String? justificada { get; set; }
+  public String? situacao { get; set; }
+  public String? controlador { get; set; }
+  public String? tecnico { get; set; }
+  public SetorAtividade setor { get; set; }
   public Composicao()
   {
     this.recurso = "";
@@ -50,4 +55,11 @@ public enum TipoViatura
   NENHUM = 0,
   LEVE = 1,
   PESADO = 2
+}
+public enum SetorAtividade
+{
+  NENHUM = 0,
+  CORE = 1,
+  LIDE = 2,
+  REN = 3
 }

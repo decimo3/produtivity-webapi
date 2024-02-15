@@ -23,7 +23,8 @@ public class Funcionario
 public enum TipoFuncionario
 {
   ELETRICISTA = 0,
-  SUPERVISOR = 1
+  SUPERVISOR = 1,
+  ADMINISTRATIVO = 2,
 }
 public enum SituacaoFuncionario
 {
