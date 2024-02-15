@@ -353,6 +353,13 @@ public class FileManager
     if(!(func.funcao == funcionario.funcao)) return false;
     return true;
   }
+  private Int32 if_exist(String funcionario, TipoFuncionario tipoFuncionario)
+  {
+    var func = this.database.funcionario.Where(o => o.nome_colaborador.ToLower() == funcionario.ToLower()).SingleOrDefault();
+    if(func == null) return 0;
+    if(!(func.funcao == tipoFuncionario)) return 0;
+    return func.matricula;
+  }
   private enum ExpectedType {Text, Number, Date, Time, Enum, Placa}
   private String abreviacao(String recurso)
   {
