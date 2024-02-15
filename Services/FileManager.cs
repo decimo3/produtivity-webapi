@@ -320,11 +320,12 @@ public class FileManager
           test = this.is_valid(temp, row, "Controlador", ExpectedType.Text);
           if(test == null)
           {
-            composicao.controlador = temp.Trim();
+            func.matricula = this.if_exist(func.nome_colaborador, func.funcao);
             func.nome_colaborador = temp.Trim();
+            composicao.id_controlador = func.matricula;
+            composicao.controlador = func.nome_colaborador;
           }
           else composicao.validacao.Add(test);
-          func.matricula = this.if_exist(func.nome_colaborador, func.funcao);
           if(func.matricula == 0) composicao.validacao.Add($"Controlador {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
         }
 

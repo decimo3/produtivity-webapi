@@ -26,6 +26,7 @@ public class Composicao
   public String? abreviacao { get; set; }
   public String? justificada { get; set; }
   public String? situacao { get; set; }
+  public int? id_controlador { get; set; }
   public String? controlador { get; set; }
   public String? tecnico { get; set; }
   public SetorAtividade setor { get; set; }
