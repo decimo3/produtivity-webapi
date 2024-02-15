@@ -339,10 +339,36 @@ public class FileManager
           composicao.identificador = composicao.dia.ToString("yyyyMMdd") + composicao.abreviacao;
         }
 
+        composicao.setor = this.is_setor(composicao.atividade);
+
         composicoes.Add(composicao);
       }
     }
     return composicoes;
+  }
+  private SetorAtividade is_setor(Atividade atividade)
+  {
+    switch(atividade)
+    {
+      case Atividade.CORTE:
+      case Atividade.RELIGA:
+      case Atividade.AVANCADO:
+      case Atividade.CAMINHAO:
+      case Atividade.EMERGENCIA:
+      case Atividade.ESTOQUE:
+        return SetorAtividade.CORE;
+      case Atividade.CONVENCIONAL:
+      case Atividade.EXTERNALIZACAO:
+      case Atividade.MANUTENCAO_BT:
+      case Atividade.AFERICAO:
+      case Atividade.BTI:
+      case Atividade.ANEXO_4:
+        return SetorAtividade.REN;
+      case Atividade.LIDE:
+      case Atividade.VISTORIADOR:
+        return SetorAtividade.LIDE;
+      default: return SetorAtividade.NENHUM;
+    }
   }
   private string? is_valid(string? arg, int linha, string campo, ExpectedType expectedType)
   {

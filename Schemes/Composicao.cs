@@ -43,7 +43,15 @@ public enum Atividade {
   AVANCADO = 3,
   CAMINHAO = 4,
   EMERGENCIA = 5,
-  ESTOQUE = 6
+  ESTOQUE = 6,
+  CONVENCIONAL = 7,
+  EXTERNALIZACAO = 8,
+  MANUTENCAO_BT = 9,
+  AFERICAO = 10,
+  BTI = 11,
+  ANEXO_4 = 12,
+  LIDE = 13,
+  VISTORIADOR = 14,
 }
 public enum Regional
 {
