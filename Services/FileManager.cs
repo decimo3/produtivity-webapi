@@ -154,9 +154,11 @@ public class FileManager
   }
   public List<Composicao> Composicao()
   {
-    string ext = Path.GetExtension(file.FileName);
-    if (ext != ".xlsx") throw new InvalidOperationException("Tipo de arquivo inválido!");
     var composicoes = new List<Composicao>();
+    String? temp, test;
+    Int32 coluna;
+    if (Path.GetExtension(file.FileName) != ".xlsx")
+      throw new InvalidOperationException("Tipo de arquivo inválido!");
     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
     using (var reader = new ExcelPackage(stream))
     {
@@ -172,7 +174,6 @@ public class FileManager
         throw new InvalidOperationException($"O arquivo enviado tem colunas a {maisoumenos} que o padrão!");
       }
       var rowCount = worksheet.Dimension.Rows;
-      string? temp, test;
       for(int row = 2; row < rowCount; row++)
       {
         var composicao = new Composicao();
