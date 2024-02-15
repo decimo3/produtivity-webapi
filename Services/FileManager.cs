@@ -180,22 +180,22 @@ public class FileManager
       {
         var composicao = new Composicao();
 
-        temp = worksheet.GetValue<string>(row, 1);
+        temp = worksheet.GetValue<string>(row, cabecalho["data"]);
         test = this.is_valid(temp, row, "Dia", ExpectedType.Date);
         if (test == null) composicao.dia = DateOnly.FromDateTime(DateTime.Parse(temp));
         else composicao.validacao.Add(test);
 
-        temp = worksheet.GetValue<string>(row, 2);
+        temp = worksheet.GetValue<string>(row, cabecalho["adesivo"]);
         test = this.is_valid(temp, row, "Adesivo", ExpectedType.Number);
         if (test == null) composicao.adesivo = Int32.Parse(temp);
         else composicao.validacao.Add(test);
 
-        temp = worksheet.GetValue<string>(row, 3);
+        temp = worksheet.GetValue<string>(row, cabecalho["placa"]);
         test = this.is_valid(temp, row, "Placa", ExpectedType.Text);
         if (test == null) composicao.placa = temp.Replace("-", "").Replace(" ", "");
         else composicao.validacao.Add(test);
 
-        temp = worksheet.GetValue<string>(row, 4);
+        temp = worksheet.GetValue<string>(row, cabecalho["recurso"]);
         test = this.is_valid(temp, row, "Recurso", ExpectedType.Text);
         var re = new System.Text.RegularExpressions.Regex("^([A-Z]{4,})(?: - [A-z]{3,})?( [-|–] Equipe )([0-9]{3})$");
         if(test == null)
@@ -205,7 +205,7 @@ public class FileManager
         }
         else composicao.validacao.Add(test);
 
-        temp = worksheet.GetValue<string>(row, 5);
+        temp = worksheet.GetValue<string>(row, cabecalho["atividade"]);
         test = this.is_valid(temp, row, "Atividade", ExpectedType.Enum);
         if(test == null)
           composicao.atividade = Enum.Parse<Atividade>(temp
@@ -220,7 +220,7 @@ public class FileManager
 
         var func = new Funcionario();
 
-        temp = worksheet.GetValue<string>(row, 6);
+        temp = worksheet.GetValue<string>(row, cabecalho["motorista"]);
         test = this.is_valid(temp, row, "Motorista", ExpectedType.Text);
         if(test == null)
         {
@@ -229,7 +229,7 @@ public class FileManager
         }
         else composicao.validacao.Add(test);
 
-        temp = worksheet.GetValue<string>(row, 7);
+        temp = worksheet.GetValue<string>(row, cabecalho["id_motorista"]);
         test = this.is_valid(temp, row, "Mat. Mot.", ExpectedType.Number);
         if(test == null)
         {
@@ -243,7 +243,7 @@ public class FileManager
 
         func = new Funcionario();
 
-        temp = worksheet.GetValue<string>(row, 8);
+        temp = worksheet.GetValue<string>(row, cabecalho["ajudante"]);
         test = this.is_valid(temp, row, "Ajudante", ExpectedType.Text);
         if (test == null)
         {
@@ -252,7 +252,7 @@ public class FileManager
         }
         else composicao.validacao.Add(test);
 
-        temp = worksheet.GetValue<string>(row, 9);
+        temp = worksheet.GetValue<string>(row, cabecalho["id_ajudante"]);
         test = this.is_valid(temp, row, "Mat. Aju.", ExpectedType.Number);
         if(test == null)
         {
@@ -264,7 +264,7 @@ public class FileManager
         func.funcao = TipoFuncionario.ELETRICISTA;
         if (!this.if_exist(func)) composicao.validacao.Add($"{func.matricula}: {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
 
-        temp = worksheet.GetValue<string>(row, 10);
+        temp = worksheet.GetValue<string>(row, cabecalho["telefone"]);
         test = this.is_valid(temp, row, "Telefone", ExpectedType.Number);
         if(test == null)
         {
@@ -276,17 +276,8 @@ public class FileManager
         else composicao.validacao.Add("O número de telefone não é válido!");
 
         func = new Funcionario();
-
-        temp = worksheet.GetValue<string>(row, 11);
-        test = this.is_valid(temp, row, "Mat. Sup.", ExpectedType.Number);
-        if(test == null)
-        {
-          composicao.id_supervisor = Int32.Parse(temp);
-          func.matricula = Int32.Parse(temp);
-        }
-        else composicao.validacao.Add(test);
-
-        temp = worksheet.GetValue<string>(row, 12);
+        func.funcao = TipoFuncionario.SUPERVISOR;
+        temp = worksheet.GetValue<string>(row, cabecalho["supervisor"]);
         test = this.is_valid(temp, row, "Supervisor", ExpectedType.Text);
         if(test == null)
         {
@@ -295,16 +286,51 @@ public class FileManager
         }
         else composicao.validacao.Add(test);
 
-        func.funcao = TipoFuncionario.SUPERVISOR;
-        if(!this.if_exist(func)) composicao.validacao.Add($"{func.matricula}: {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+        if (cabecalho.TryGetValue("id_supervisor", out coluna))
+        {
+          temp = worksheet.GetValue<string>(row, coluna);
+          test = this.is_valid(temp, row, "Mat. Sup.", ExpectedType.Number);
+          if(test == null)
+          {
+            composicao.id_supervisor = Int32.Parse(temp);
+            func.matricula = Int32.Parse(temp);
+          }
+          else composicao.validacao.Add(test);
+          if(!this.if_exist(func)) composicao.validacao.Add($"{func.matricula}: {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+        }
+        else
+        {
+          func.matricula = this.if_exist(func.nome_colaborador, func.funcao);
+          if(func.matricula == 0) composicao.validacao.Add($"Supervisor {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+        }
 
-        temp = worksheet.GetValue<string>(row, 13);
-        test = this.is_valid(temp, row, "Atividade", ExpectedType.Enum);
+        temp = worksheet.GetValue<string>(row, cabecalho["regional"]);
+        test = this.is_valid(temp, row, "Regional", ExpectedType.Enum);
         if(test == null)
           composicao.regional = Enum.Parse<Regional>(temp
             .Replace("CAMPO GRANDE", "OESTE")
             .Replace("JACAREPAGUA", "OESTE"));
         else composicao.validacao.Add(test);
+
+        if (cabecalho.TryGetValue("controlador", out coluna))
+        {
+          func = new Funcionario();
+          func.funcao = TipoFuncionario.ADMINISTRATIVO;
+          temp = worksheet.GetValue<string>(row, coluna);
+          test = this.is_valid(temp, row, "Controlador", ExpectedType.Text);
+          if(test == null)
+          {
+            composicao.controlador = temp.Trim();
+            func.nome_colaborador = temp.Trim();
+          }
+          else composicao.validacao.Add(test);
+          func.matricula = this.if_exist(func.nome_colaborador, func.funcao);
+          if(func.matricula == 0) composicao.validacao.Add($"Controlador {func.nome_colaborador} não foi encontrado na lista ou nome não corresponde a matrícula!");
+        }
+
+        composicao.justificada = cabecalho.TryGetValue("justificada", out coluna) ? worksheet.GetValue<string>(row, coluna) : null;
+        composicao.situacao = cabecalho.TryGetValue("situacao", out coluna) ? worksheet.GetValue<string>(row, coluna) : null;
+        composicao.tecnico = cabecalho.TryGetValue("tecnico", out coluna) ? worksheet.GetValue<string>(row, coluna) : null;
 
         if((composicao.dia != DateOnly.MinValue) && (composicao.recurso != null))
         {
