@@ -375,4 +375,41 @@ public class FileManager
     abreviado += re3.Match(recurso).Value;
     return abreviado;
   }
+  private Dictionary<String, Int32> Cabecalho(String[] primeira_linha)
+  {
+    Dictionary<String, Int32> cabecalho = new();
+    var apontador = 1;
+    do
+    {
+      switch(primeira_linha[apontador])
+      {
+        case null: break;
+        case "data": cabecalho.Add("data", apontador); break;
+        case "recurso": cabecalho.Add("recurso", apontador); break;
+        case "serviço": cabecalho.Add("recurso", apontador); break;
+        case "bdi": cabecalho.Add("recurso", apontador); break;
+        case "placa": cabecalho.Add("placa", apontador); break;
+        case "adesivo light": cabecalho.Add("adesivo", apontador); break;
+        case "justificada": cabecalho.Add("justificada", apontador); break;
+        case "regional": cabecalho.Add("regional", apontador); break;
+        case "área de atuação": cabecalho.Add("regional", apontador); break;
+        case "situação": cabecalho.Add("situacao", apontador); break;
+        case "atividade": cabecalho.Add("atividade", apontador); break;
+        case "alavanca": cabecalho.Add("atividade", apontador); break;
+        case "matrícula 01": cabecalho.Add("id_motorista", apontador); break;
+        case "executor 01": cabecalho.Add("motorista", apontador); break;
+        case "matrícula 02": cabecalho.Add("id_ajudante", apontador); break;
+        case "executor 02": cabecalho.Add("ajudante", apontador); break;
+        case "telefone": cabecalho.Add("telefone", apontador); break;
+        case "telefone equipe": cabecalho.Add("telefone", apontador); break;
+        case "matricula sup": cabecalho.Add("id_supervisor", apontador); break;
+        case "supervisor empreiteira": cabecalho.Add("supervisor", apontador); break;
+        case "qtr": cabecalho.Add("controlador", apontador); break;
+        case "técnico light": cabecalho.Add("tecnico", apontador); break;
+        default: throw new InvalidOperationException("O nome da coluna não foi reconhecido!");
+      }
+      apontador += 1;
+    } while (apontador < primeira_linha.Length);
+    return cabecalho;
+  }
 }
