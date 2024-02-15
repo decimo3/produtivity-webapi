@@ -163,16 +163,18 @@ public class FileManager
     using (var reader = new ExcelPackage(stream))
     {
       if(reader.Workbook.Worksheets.Count > 1)
-      {
         throw new InvalidOperationException("O arquivo enviado tem mais de uma planilha!");
-      }
       var worksheet = reader.Workbook.Worksheets[0];
       var colCount = worksheet.Dimension.Columns;
-      if(colCount != 13)
+      var primeira_linha = new String[20];
+      primeira_linha[0] = colCount.ToString();
+      for(int col = 1; col <= colCount; col++)
       {
-        var maisoumenos = (colCount > 13) ? "mais" : "menos";
-        throw new InvalidOperationException($"O arquivo enviado tem colunas a {maisoumenos} que o padrão!");
+        temp = worksheet.GetValue<String>(1, col);
+        if (temp == null || temp == String.Empty) continue;
+        primeira_linha[col] = temp.ToLower();
       }
+      var cabecalho = Cabecalho(primeira_linha);
       var rowCount = worksheet.Dimension.Rows;
       for(int row = 2; row < rowCount; row++)
       {
