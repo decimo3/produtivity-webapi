@@ -9,7 +9,6 @@ public class Atividade
   [DatabaseGenerated(DatabaseGeneratedOption.None)]
   public Int16 id_atividade { get; set; }
   public String atividade { get; set; }
-
   public Atividade (Int16 id_processo, Int16 id_atividade, String atividade)
   {
     this.id_processo = id_processo;
