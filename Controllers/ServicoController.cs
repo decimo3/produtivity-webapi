@@ -27,6 +27,8 @@ namespace backend.Controllers
         public ActionResult PostServico(IFormFile file)
         {
             if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
+            if(_context.relatorio.Any(r => r.filename == file.FileName))
+                return Conflict("Já existe um relatório com esse nome de arquivo!\nSe for um reenvio, considere trocar o nome do arquivo ou excluir o relatório anterior!");
             var filemanager = new FileManager(_context, file);
             var relatorio = filemanager.Relatorio();
             var adicionado = 0;
