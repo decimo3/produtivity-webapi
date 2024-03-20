@@ -19,6 +19,8 @@ app.UseHttpsRedirection();
 var HOST = System.Environment.GetEnvironmentVariable("COMPUTERNAME")
   ?? throw new InvalidOperationException("Environment variable COMPUTERNAME is not set or is innacessible!");
 var allowedOrigins = new String[] {
+  $"http://{HOST.ToLower()}",
+  $"https://{HOST.ToLower()}",
   $"http://{HOST.ToLower()}:80",
   $"https://{HOST.ToLower()}:443",
   $"http://{HOST.ToLower()}:8080",
