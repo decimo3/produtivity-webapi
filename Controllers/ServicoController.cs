@@ -101,9 +101,10 @@ namespace backend.Controllers
         public ActionResult DownloadServico(string filename)
         {
           if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
+          if(!_context.relatorio.Any(r => r.filename == filename)) return NotFound();
           try
           {
-            var stream = System.IO.File.OpenRead(@$"./AppData/relatorios_ofs/{filename}");
+            var stream = System.IO.File.OpenRead(@$"D:/RELATORIOS/{filename}");
             return new FileStreamResult(stream, "application/octet-stream");
           }
           catch (FileNotFoundException erro)

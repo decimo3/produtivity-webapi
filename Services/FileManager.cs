@@ -47,7 +47,7 @@ public class FileManager
     }
     writer.Flush();
     memory.Position = 0;
-    using (var fileStream = new FileStream($"./AppData/relatorios_ofs/{file.FileName}", FileMode.Create, FileAccess.Write))
+    using (var fileStream = new FileStream(@$"D:/RELATORIOS/{file.FileName}", FileMode.Create, FileAccess.Write))
     {
       memory.CopyTo(fileStream);
     }
