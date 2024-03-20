@@ -20,8 +20,12 @@ namespace backend.Controllers
         {
             this.database = database;
             this.alteracaoLog = alteracaoLog;
-            this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
             this.alteracaoLog.tabela = this.ToString()!;
+            if(httpContext.HttpContext != null)
+            {
+              var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+              if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+            }
         }
         // GET: api/Composicao
         [HttpGet("{inicio}/{final}/{regional}/{atividade}")]
@@ -38,6 +42,7 @@ namespace backend.Controllers
         [HttpPut("{data}/{recurso}")]
         public ActionResult PutComposicao(DateOnly data, string recurso, Composicao composicao)
         {
+            if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
             if (!ComposicaoExists(data, recurso)) return NotFound();
             if (recurso != composicao.recurso)
             {
@@ -80,6 +85,7 @@ namespace backend.Controllers
         [ActionName("PostFormulario")]
         public ActionResult PostComposicao(Composicao composicao)
         {
+          if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
           if (database.composicao == null)
           {
               return Problem("Entity set 'Database.composicao'  is null.");
@@ -113,6 +119,7 @@ namespace backend.Controllers
         [HttpDelete("{data}/{recurso}")]
         public ActionResult DeleteComposicao(DateOnly data, string recurso)
         {
+            if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
             if (database.composicao == null) return NotFound();
             var composicao = database.composicao.Find(data, recurso);
             if (composicao == null) return NotFound();
@@ -130,6 +137,7 @@ namespace backend.Controllers
         [ActionName("PostArquivo")]
         public ActionResult PostComposicao(IFormFile file)
         {
+            if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
             if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
             var filemanager = new FileManager(database, file);
             try

@@ -31,4 +31,11 @@ public class AlteracoesServico
       .Where(o => o.identificador > minimo && o.identificador < maximo)
       .ToList();
   }
+  public bool is_ready()
+  {
+    if(this.database == null) return false;
+    if(this.responsavel == 0) return false;
+    if(this.tabela == String.Empty) return false;
+    return true;
+  }
 }

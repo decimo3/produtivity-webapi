@@ -20,12 +20,17 @@ namespace backend.Controllers
         {
             _context = context;
             this.alteracaoLog = alteracaoLog;
-            this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
             this.alteracaoLog.tabela = this.ToString()!;
+            if(httpContext.HttpContext != null)
+            {
+              var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+              if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+            }
         }
         [HttpPost]
         public ActionResult PostServico(IFormFile file)
         {
+          if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
             if (file.Length == 0) return BadRequest("O arquivo enviado está vazio!");
             if(_context.relatorio.Any(r => r.filename == file.FileName))
                 return Conflict("Já existe um relatório com esse nome de arquivo!\nSe for um reenvio, considere trocar o nome do arquivo ou excluir o relatório anterior!");
@@ -95,6 +100,7 @@ namespace backend.Controllers
         [HttpGet("{filename}")]
         public ActionResult DownloadServico(string filename)
         {
+          if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
           try
           {
             var stream = System.IO.File.OpenRead(@$"./AppData/relatorios_ofs/{filename}");
@@ -112,6 +118,7 @@ namespace backend.Controllers
         [HttpDelete("{filename}")]
         public ActionResult DeleteServico(string filename)
         {
+          if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
           try
           {
             var relatorio = _context.relatorio.Where(x => x.filename == filename);

@@ -13,8 +13,12 @@ public class ValoracaoController : ControllerBase
     {
         _context = context;
         this.alteracaoLog = alteracaoLog;
-        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
         this.alteracaoLog.tabela = this.ToString()!;
+        if(httpContext.HttpContext != null)
+        {
+          var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+          if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+        }
     }
     private bool ValoracaoExists(Regional regional, TipoViatura viatura, Atividade atividade, String codigo)
     {
@@ -23,6 +27,7 @@ public class ValoracaoController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Valoracao>> PostValoracao(Valoracao valoracao)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.valoracao == null) return Problem("Entity set 'Database.valoracao'  is null.");
         if (ValoracaoExists(valoracao.regional, valoracao.tipo_viatura, valoracao.atividade, valoracao.codigo)) return Conflict();
         _context.valoracao.Add(valoracao);
@@ -50,6 +55,7 @@ public class ValoracaoController : ControllerBase
     [HttpDelete("{regional}/{viatura}/{atividade}/{codigo}")]
     public async Task<IActionResult> DeleteValoracao(Regional regional, TipoViatura viatura, Atividade atividade, String codigo)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.valoracao == null) return NotFound();
         var valoracao = await _context.valoracao.FindAsync(regional, viatura, atividade, codigo);
         if (valoracao == null) return NotFound();

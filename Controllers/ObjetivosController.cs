@@ -13,8 +13,12 @@ public class ObjetivosController : ControllerBase
     {
         _context = context;
         this.alteracaoLog = alteracaoLog;
-        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
         this.alteracaoLog.tabela = this.ToString()!;
+        if(httpContext.HttpContext != null)
+        {
+          var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+          if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+        }
     }
     private bool ObjetivosExists(Regional regional, TipoViatura tipoviatura, Atividade atividade)
     {
@@ -23,6 +27,7 @@ public class ObjetivosController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Objetivos>> PostObjetivos(Objetivos objetivos)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.objetivo == null) return Problem("Entity set 'Database.objetivo'  is null.");
         if (ObjetivosExists(objetivos.regional, objetivos.tipo_viatura, objetivos.atividade)) return Conflict();
         _context.objetivo.Add(objetivos);
@@ -50,6 +55,7 @@ public class ObjetivosController : ControllerBase
     [HttpDelete("{regional}/{viatura}/{atividade}")]
     public async Task<IActionResult> DeleteObjetivos(Regional regional, TipoViatura viatura, Atividade atividade)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.objetivo == null) return NotFound();
         var objetivos = await _context.objetivo.FindAsync(regional, viatura, atividade);
         if (objetivos == null) return NotFound();

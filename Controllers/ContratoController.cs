@@ -14,8 +14,12 @@ public class ContratoController : ControllerBase
     {
         _context = context;
         this.alteracaoLog = alteracaoLog;
-        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
         this.alteracaoLog.tabela = this.ToString()!;
+        if(httpContext.HttpContext != null)
+        {
+          var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+          if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+        }
     }
     private bool ContratoExists(string id)
     {
@@ -30,6 +34,7 @@ public class ContratoController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Contrato>> PostContrato(Contrato contrato)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.contrato == null) return Problem("Entity set 'Database.contrato'  is null.");
         if (ContratoExists(contrato.contrato)) return Conflict();
         _context.contrato.Add(contrato);
@@ -51,6 +56,7 @@ public class ContratoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteContrato(string id)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.contrato == null) return NotFound();
         var contrato = await _context.contrato.FindAsync(id);
         if (contrato == null) return NotFound();

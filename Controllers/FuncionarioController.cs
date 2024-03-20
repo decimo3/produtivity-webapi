@@ -21,8 +21,12 @@ namespace backend.Controllers
         {
             _context = context;
             this.alteracaoLog = alteracaoLog;
-            this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
             this.alteracaoLog.tabela = this.ToString()!;
+            if(httpContext.HttpContext != null)
+            {
+              var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+              if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+            }
         }
 
         // GET: api/Funcionario
@@ -55,6 +59,7 @@ namespace backend.Controllers
             try
             {
               _context.SaveChanges();
+              alteracaoLog.responsavel = auth.matricula;
               alteracaoLog.Registrar("PUT", anterior, auth);
             }
             catch (DbUpdateConcurrencyException erro)
@@ -92,6 +97,7 @@ namespace backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFuncionario(int id, Funcionario funcionario)
         {
+            if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
             if (_context.funcionario == null) return Problem("Entity set 'Database.funcionario'  is null.");
             if (!FuncionarioExists(id)) return NotFound();
             if (id != funcionario.matricula)
@@ -131,6 +137,7 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Funcionario>> PostFuncionario(FuncionarioCreate f)
         {
+            if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
             if (_context.funcionario == null) return Problem("Entity set 'Database.funcionario'  is null.");
             if (FuncionarioExists(f.matricula)) return Conflict();
             var funcionario = new Funcionario()
@@ -161,6 +168,7 @@ namespace backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFuncionario(int id)
         {
+          if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
           if (_context.funcionario == null) return NotFound();
           var funcionario = await _context.funcionario.FindAsync(id);
           if (funcionario == null) return NotFound();
@@ -189,6 +197,7 @@ namespace backend.Controllers
         [ActionName("PutTrocarSenha")]
         public ActionResult PutFuncionario(Int32 id, FuncionarioTrocarSenha alterar)
         {
+          if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
           var funcionario = _context.funcionario.Find(id);
           if(funcionario is null) return NotFound();
           var anterior = funcionario;

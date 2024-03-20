@@ -13,8 +13,12 @@ public class FeriadoController : ControllerBase
     {
         _context = context;
         this.alteracaoLog = alteracaoLog;
-        this.alteracaoLog.responsavel = ((Funcionario)httpContext.HttpContext!.Items["User"]!).matricula;
         this.alteracaoLog.tabela = this.ToString()!;
+        if(httpContext.HttpContext != null)
+        {
+          var funcionario = (Funcionario?)httpContext.HttpContext.Items["User"];
+          if(funcionario != null) this.alteracaoLog.responsavel = funcionario.matricula;
+        }
     }
     private bool FeriadoExists(DateOnly id)
     {
@@ -23,6 +27,7 @@ public class FeriadoController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Feriado>> PostFeriado(Feriado feriado)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.feriado == null) return Problem("Entity set 'Database.feriado'  is null.");
         if (FeriadoExists(feriado.dia)) return Conflict();
         _context.feriado.Add(feriado);
@@ -50,6 +55,7 @@ public class FeriadoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFeriado(DateOnly id)
     {
+        if(!this.alteracaoLog.is_ready()) return Unauthorized("Usuário não foi encontrado no contexto da solicitação!");
         if (_context.feriado == null) return NotFound();
         var feriado = await _context.feriado.FindAsync(id);
         if (feriado == null) return NotFound();
