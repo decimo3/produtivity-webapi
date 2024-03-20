@@ -25,6 +25,7 @@ public class AutenticacaoController : ControllerBase
       HttpOnly = false, // define a cookie como acessível somente por HTTP, não pode ser acessado por JavaScript.
       Path = "/"
     };
+    if(context.HttpContext is null) return Problem("Não foi possível acessar o contexto da requisição!");
     context.HttpContext.Response.Cookies.Append("MeuCookie", auth.token, options);
     return Ok(auth);
   }
@@ -32,6 +33,7 @@ public class AutenticacaoController : ControllerBase
   [AutenticacaoAtributo]
   public ActionResult Get()
   {
+    if(context.HttpContext is null) return Problem("Não foi possível acessar o contexto da requisição!");
     var auth = context.HttpContext.Items["User"];
     if (auth is null) throw new InvalidOperationException("The employee was not defined in the context of the request!");
     return Ok(auth);

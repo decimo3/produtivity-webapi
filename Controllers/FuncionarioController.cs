@@ -98,6 +98,7 @@ namespace backend.Controllers
             {
                 if (FuncionarioExists(funcionario.matricula)) return Conflict();
                 var f = await _context.funcionario.FindAsync(id);
+                if(f is null) return NotFound();
                 _context.funcionario.Add(funcionario);
                 _context.funcionario.Remove(f);
                 try
