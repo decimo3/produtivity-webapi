@@ -334,7 +334,7 @@ public class FileManager
         if(arg.Length < 5) return "O texto está incompleto ou vazio!";
       break;
       case ExpectedType.Enum:
-        String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA", "ESTOQUE DE CORTADOS", "CORTE EXTRA"};
+        String[] enums = {"BAIXADA", "CAMPO GRANDE", "JACAREPAGUA", "LESTE", "CORTE", "RELIGA", "RELIGA POSTO", "RELIGA CAMINHÃO", "EMERGÊNCIA", "ESTOQUE DE CORTADOS", "CORTE EXTRA"};
         if(!enums.Contains(arg)) return "O texto encontrado não corresponde com o padrão!";
       break;
       case ExpectedType.Placa:
