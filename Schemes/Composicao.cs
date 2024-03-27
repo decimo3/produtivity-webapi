@@ -43,7 +43,8 @@ public enum Regional
 {
   NENHUM = 0,
   BAIXADA = 1,
-  OESTE = 2
+  OESTE = 2,
+  LESTE = 3,
 }
 public enum TipoViatura
 {
